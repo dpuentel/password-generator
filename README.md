@@ -6,6 +6,8 @@ You can test a ** [demo here](https://password-generator.dpuentel.com/) **.
 [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/dpuentel/password-generator/tree/main)
 [![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/s/github/dpuentel/password-generator/tree/main)
 
+![Preview](images/site-preview.png)
+
 ## 🚀 Project Description
 
 This is a React Password Generator.
