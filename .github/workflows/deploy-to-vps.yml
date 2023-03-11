@@ -31,4 +31,3 @@ jobs:
             git status
             pnpm install --prod
             pnpm run build
-            chown -R dpuente:www-data /opt/apps/password-generator/dist/*
