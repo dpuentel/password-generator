@@ -1,54 +1,31 @@
-# Astro Starter Kit: Basics
+# Password Generator
 
-```
-npm create astro@latest -- --template basics
-```
+You can test a ** [demo here](https://password-generator.dpuentel.com/) **.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/dpuentel/password-generator/tree/main)
+[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/s/github/dpuentel/password-generator/tree/main)
 
-![basics](https://user-images.githubusercontent.com/4677417/186188965-73453154-fdec-4d6b-9c34-cb35c248ae5b.png)
+## 🚀 Project Description
 
-## 🚀 Project Structure
+This is a React Password Generator.
 
-Inside of your Astro project, you'll see the following folders and files:
+The page is over Astro, a static site generator for modern web apps.
 
-```
-/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── components/
-│   │   └── Card.astro
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+## 🧑‍💻 Project Tech Stack
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+### 🚀 [Astro](https://astro.build/)
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+Astro is the web framework that is used to build the project. It's fast, lightweight and make life easier.
 
-Any static assets, like images, can be placed in the `public/` directory.
+### ⚛️ [React](https://reactjs.org/)
 
-## 🧞 Commands
+React is used to build some UI components.
 
-All commands are run from the root of the project, from a terminal:
+### 🎨 [TailwindCSS](https://tailwindcss.com/)
 
-| Command                | Action                                           |
-| :--------------------- | :----------------------------------------------- |
-| `npm install`          | Installs dependencies                            |
-| `npm run dev`          | Starts local dev server at `localhost:3000`      |
-| `npm run build`        | Build your production site to `./dist/`          |
-| `npm run preview`      | Preview your build locally, before deploying     |
-| `npm run astro ...`    | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro --help` | Get help using the Astro CLI                     |
+Tailwind CSS to fast style and build custom designs.
 
-## 👀 Want to learn more?
+### 📦 [Dinahosting VPS](https://www.dinahosting.com/)
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+The [demo](https://password-generator.dpuentel.com/) is deployed to a VPS from Dinahosting using a GitHub Action.
