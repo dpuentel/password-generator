@@ -2,7 +2,31 @@
   "env": {
     "es2022": true,
     "node": true,
-    "browser": true
+    "browser": true,
+    "astro/astro": true
   },
-  "extends": ["eslint:recommended", "standard", "plugin:astro/recommended"]
+  "extends": [
+    "eslint:recommended",
+    "eslint-config-prettier",
+    "standard",
+    "plugin:astro/recommended"
+  ],
+  "rules": {
+    "indent": ["warn", "tab"],
+    "no-unused-vars": "warn",
+    "no-multiple-empty-lines": "off",
+    "no-tabs": "off",
+    "quotes": ["warn", "single"],
+    "jsx-quotes": ["warn", "prefer-single"],
+    "eol-last": "off"
+  },
+  "overrides": [
+    {
+      "files": ["*.astro"],
+      "parser": "astro-eslint-parser",
+      "rules": {
+        "astro/no-set-html-directive": "error"
+      }
+    }
+  ]
 }

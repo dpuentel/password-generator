@@ -24,7 +24,7 @@ export function useGeneratePasword () {
 		let password = ''
 
 		activePatterns.forEach((pattern) => {
-			[...Array(charactersByPattern)].forEach(() => {
+			;[...Array(charactersByPattern)].forEach(() => {
 				password += getCharacterForPattern(pattern)
 				lastUsedPattern = pattern
 			})
@@ -40,10 +40,7 @@ export function useGeneratePasword () {
 	}
 
 	const getPatternsNumberActive = () => {
-		return (
-			[includeNumbers, includeSymbols, includeUppercase].filter(Boolean)
-				.length + 1
-		)
+		return [includeNumbers, includeSymbols, includeUppercase].filter(Boolean).length + 1
 	}
 
 	const getActivePatterns = () => {
