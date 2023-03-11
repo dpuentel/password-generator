@@ -82,7 +82,6 @@ export default function PasswordGenerator() {
 
   return (
     <section className="grid grid-cols-1 gap-4 place-items-center">
-      <Title text="Password Generator" />
       <article className="w-80">
         <PasswordResult password={password} placeholder="P4$5W0rD!" size="5" />
       </article>
