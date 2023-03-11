@@ -12,6 +12,7 @@ import {
 } from "./Patterns";
 import Title from "./Title";
 import PasswordStrength from "./PasswordStrength";
+import { useEffect } from "react";
 
 export default function PasswordGenerator() {
   const [password, setPassword] = useState("");
@@ -19,6 +20,10 @@ export default function PasswordGenerator() {
   const [includeUppercase, setIncludeUppercase] = useState(false);
   const [includeNumbers, setIncludeNumbers] = useState(false);
   const [includeSymbols, setIncludeSymbols] = useState(false);
+
+  useEffect(() => {
+	generatePassword();
+  }, [includeUppercase, includeNumbers, includeSymbols, length])
 
   const generatePassword = () => {
     const charactersByPattern = Math.floor(length / getPatternsNumberActive());
@@ -80,6 +85,18 @@ export default function PasswordGenerator() {
     return result[0];
   };
 
+  const handleChangeCheckboxUpperCase = (e) => {
+	setIncludeUppercase(e.target.checked);
+  }
+
+  const handleChangeCheckboxNumbers = (e) => {
+	setIncludeNumbers(e.target.checked);
+  }
+
+  const handleChangeCheckboxSymbols = (e) => {
+    setIncludeSymbols(e.target.checked);
+  }
+
   return (
     <section className="grid grid-cols-1 gap-4 place-items-center">
       <article className="w-80">
@@ -106,17 +123,17 @@ export default function PasswordGenerator() {
         <CheckboxLabeled
           label="Include Uppercase Letters"
           checked={includeUppercase}
-          onChange={(e) => setIncludeUppercase(e.target.checked)}
+          onChange={handleChangeCheckboxUpperCase}
         />
         <CheckboxLabeled
           label="Include Numbers"
           checked={includeNumbers}
-          onChange={(e) => setIncludeNumbers(e.target.checked)}
+          onChange={handleChangeCheckboxNumbers}
         />
         <CheckboxLabeled
           label="Include Symbols"
           checked={includeSymbols}
-          onChange={(e) => setIncludeSymbols(e.target.checked)}
+          onChange={handleChangeCheckboxSymbols}
         />
         <PasswordStrength password={password} />
         <Button onClick={generatePassword} text={"GENERATE 🡆"} />
