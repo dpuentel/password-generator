@@ -4,7 +4,7 @@ import RangeSlider from './RangeSlider'
 import CheckboxLabeled from './CheckboxLabeled'
 import Button from './Button'
 import PasswordStrength from './PasswordStrength'
-import { useGeneratePasword } from '../hooks/useGeneratePassword'
+import { useGeneratePassword } from '../hooks/useGeneratePassword'
 
 export default function PasswordGenerator() {
 	const {
@@ -18,7 +18,7 @@ export default function PasswordGenerator() {
 		includeSymbols,
 		setIncludeSymbols,
 		generatePassword
-	} = useGeneratePasword()
+	} = useGeneratePassword()
 
 	const handleChangeCheckboxUpperCase = (e) => {
 		setIncludeUppercase(e.target.checked)
