@@ -14,13 +14,13 @@ describe('PasswordStrength', () => {
 		expect(screen.getByText('STRENGTH')).toBeInTheDocument()
 	})
 
-	it('shows minimal filled bars for empty password', () => {
+	it('shows no filled bars for empty password', () => {
 		render(<PasswordStrength password="" />)
 		const bars = document.querySelectorAll('.grid-cols-10 span')
 		const filledBars = Array.from(bars).filter(
 			(bar) => bar.className && bar.className.includes('bg-gray-300')
 		)
-		expect(filledBars.length).toBeGreaterThan(0)
+		expect(filledBars.length).toBe(0)
 	})
 
 	it('shows some filled bars for a weak password', () => {

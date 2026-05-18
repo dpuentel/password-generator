@@ -11,9 +11,10 @@ export const PasswordEntropyCalculator = (password) => {
 		hasUppercase && 26,
 		hasNumber && 10,
 		hasSpecial && 33,
-		hasEmoji && 1
+		hasEmoji && 3662
 	].filter(Boolean)
 
-	// current max 426.41...
+	if (sets.length === 0) return 0
+
 	return Math.log2(sets.reduce((a, b) => a * b, 1)) * length
 }

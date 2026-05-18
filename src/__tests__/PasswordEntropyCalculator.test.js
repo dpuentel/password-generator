@@ -65,4 +65,10 @@ describe('PasswordEntropyCalculator', () => {
 		const result8 = PasswordEntropyCalculator('abcdefgh')
 		expect(result8).toBeCloseTo(result4 * 2)
 	})
+
+	it('calculates entropy for password with emoji', () => {
+		const result = PasswordEntropyCalculator('a\ud83d\ude00')
+		const expected = Math.log2(26 * 3662) * 3
+		expect(result).toBeCloseTo(expected)
+	})
 })
