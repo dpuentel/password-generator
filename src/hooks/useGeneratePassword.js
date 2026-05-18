@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import {
-	PatternSymbols,
-	PatternNumbers,
-	PatternUppercase,
-	PatternLowerCase
+	CharsetSymbols,
+	CharsetNumbers,
+	CharsetUppercase,
+	CharsetLowercase
 } from '../services/Patterns'
 
 export function useGeneratePassword () {
@@ -40,10 +40,10 @@ export function useGeneratePassword () {
 	}
 
 	const getActivePatterns = () => {
-		const charsets = [PatternLowerCase]
-		if (includeUppercase) charsets.push(PatternUppercase)
-		if (includeNumbers) charsets.push(PatternNumbers)
-		if (includeSymbols) charsets.push(PatternSymbols)
+		const charsets = [CharsetLowercase]
+		if (includeUppercase) charsets.push(CharsetUppercase)
+		if (includeNumbers) charsets.push(CharsetNumbers)
+		if (includeSymbols) charsets.push(CharsetSymbols)
 		return charsets
 	}
 
