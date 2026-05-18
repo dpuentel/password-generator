@@ -40,11 +40,10 @@ jobs:
 
             echo "📦 Installing dependencies (IPv4 only, with retry)..."
             export NODE_OPTIONS="--dns-result-order=ipv4first"
-            rm -rf node_modules
             MAX_RETRIES=3
             RETRY_COUNT=0
             while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-              if pnpm install --prod; then
+              if pnpm install --prod --config.minimum-release-age=0; then
                 echo "✅ Dependencies installed successfully"
                 break
               fi
