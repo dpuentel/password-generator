@@ -22,36 +22,46 @@ jobs:
           script: |
             set -e
 
-            echo "=== Starting deployment ==="
-            cd /opt/apps/password-generator
+            echo "🚀 Starting deployment..."
 
-            echo "--- Pulling latest changes ---"
+            echo "📦 Loading nvm..."
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            nvm use 24
+
+            echo "🔧 Node/pnpm versions:"
+            node -v
+            pnpm -v
+
+            echo "📥 Pulling latest changes..."
+            cd /opt/apps/password-generator
             git pull origin main
             git status
 
-            echo "--- Installing dependencies (IPv4 only, with retry) ---"
+            echo "📦 Installing dependencies (IPv4 only, with retry)..."
             export NODE_OPTIONS="--dns-result-order=ipv4first"
             MAX_RETRIES=3
             RETRY_COUNT=0
             while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-              if pnpm install --prod --prefer-offline; then
-                echo "--- Dependencies installed successfully ---"
+              if pnpm install --prod; then
+                echo "✅ Dependencies installed successfully"
                 break
               fi
               RETRY_COUNT=$((RETRY_COUNT + 1))
               if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-                echo "Install failed (attempt $RETRY_COUNT/$MAX_RETRIES). Retrying in 10s..."
+                echo "⚠️ Install failed (attempt $RETRY_COUNT/$MAX_RETRIES). Retrying in 10s..."
                 sleep 10
               fi
             done
 
             if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+              echo "❌ Failed to install dependencies after $MAX_RETRIES attempts"
               echo "::error::Failed to install dependencies after $MAX_RETRIES attempts"
               exit 1
             fi
 
-            echo "--- Building application ---"
+            echo "🏗️ Building application..."
             pnpm run build
 
-            echo "=== Deployment completed successfully ==="
+            echo "✅ Deployment completed successfully 🎉"
           debug: true
