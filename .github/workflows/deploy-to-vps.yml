@@ -1,15 +1,9 @@
-# Sample workflow for building and deploying an Astro site to GitHub Pages
-#
-# To get started with Astro see: https://docs.astro.build/en/getting-started/
-#
 name: Deploy to VPS
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
@@ -21,13 +15,43 @@ jobs:
         id: deployment
         uses: appleboy/ssh-action@master
         with:
-          host: ${{secrets.HOST}}
-          username: ${{secrets.USERNAME}}
-          key: ${{secrets.PRIVATE_KEY}}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
           port: 22
           script: |
+            set -e
+
+            echo "=== Starting deployment ==="
             cd /opt/apps/password-generator
+
+            echo "--- Pulling latest changes ---"
             git pull origin main
             git status
-            pnpm install --prod
+
+            echo "--- Installing dependencies (IPv4 only, with retry) ---"
+            export NODE_OPTIONS="--dns-result-order=ipv4first"
+            MAX_RETRIES=3
+            RETRY_COUNT=0
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if pnpm install --prod --prefer-offline; then
+                echo "--- Dependencies installed successfully ---"
+                break
+              fi
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "Install failed (attempt $RETRY_COUNT/$MAX_RETRIES). Retrying in 10s..."
+                sleep 10
+              fi
+            done
+
+            if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+              echo "::error::Failed to install dependencies after $MAX_RETRIES attempts"
+              exit 1
+            fi
+
+            echo "--- Building application ---"
             pnpm run build
+
+            echo "=== Deployment completed successfully ==="
+          debug: true
