@@ -9,11 +9,9 @@
 	"overrides": [
 		{
 			"files": ["*.json", "*.md", "*.toml", "*.yml"],
-			"options": [
-				{
-					"useTabs": false
-				}
-			]
+			"options": {
+				"useTabs": false
+			}
 		}
 	],
 	"endOfLine": "lf"

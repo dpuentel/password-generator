@@ -33,7 +33,7 @@
     "eslint-config-prettier": "8.10.2",
     "eslint-plugin-astro": "1.7.0",
     "jsdom": "29.1.1",
-    "prettier": "2.8.4",
+    "prettier": "3.8.3",
     "prettier-plugin-astro": "0.14.1",
     "standard": "17.1.2",
     "vitest": "4.1.6"

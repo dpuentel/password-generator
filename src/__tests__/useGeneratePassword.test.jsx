@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useGeneratePassword } from '../hooks/useGeneratePassword'
-import { CharsetLowercase, CharsetUppercase, CharsetNumbers, CharsetSymbols } from '../services/Patterns'
+import {
+	CharsetLowercase,
+	CharsetUppercase,
+	CharsetNumbers,
+	CharsetSymbols
+} from '../services/Patterns'
 
 describe('useGeneratePassword', () => {
 	beforeEach(() => {
