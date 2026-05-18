@@ -15,11 +15,25 @@ describe('PasswordGenerator', () => {
 		render(<PasswordGenerator />)
 		expect(screen.getByRole('slider')).toBeInTheDocument()
 		expect(screen.getByText('Character Length')).toBeInTheDocument()
+		expect(screen.getByText('Include Lowercase Letters')).toBeInTheDocument()
 		expect(screen.getByText('Include Uppercase Letters')).toBeInTheDocument()
 		expect(screen.getByText('Include Numbers')).toBeInTheDocument()
 		expect(screen.getByText('Include Symbols')).toBeInTheDocument()
 		expect(screen.getByText('STRENGTH')).toBeInTheDocument()
-		expect(screen.getByRole('button', { name: /GENERATE/ })).toBeInTheDocument()
+		expect(screen.getByRole('button', { name: 'Generate password' })).toBeInTheDocument()
+	})
+
+	it('lowercase checkbox is checked by default', () => {
+		render(<PasswordGenerator />)
+		const checkbox = screen.getByLabelText('Include Lowercase Letters')
+		expect(checkbox).toBeChecked()
+	})
+
+	it('toggling lowercase checkbox updates state', () => {
+		render(<PasswordGenerator />)
+		const checkbox = screen.getByLabelText('Include Lowercase Letters')
+		fireEvent.click(checkbox)
+		expect(checkbox).not.toBeChecked()
 	})
 
 	it('toggling uppercase checkbox updates state', () => {
@@ -45,7 +59,7 @@ describe('PasswordGenerator', () => {
 
 	it('clicking GENERATE button triggers new password', () => {
 		render(<PasswordGenerator />)
-		const generateButton = screen.getByRole('button', { name: /GENERATE/ })
+		const generateButton = screen.getByRole('button', { name: 'Generate password' })
 		const initialText = screen.getByText(/^[a-z]+$/).textContent
 		fireEvent.click(generateButton)
 		const newText = screen.getByText(/^[a-z]+$/).textContent
@@ -54,7 +68,7 @@ describe('PasswordGenerator', () => {
 
 	it('copy button shows copy icon after generating', () => {
 		render(<PasswordGenerator />)
-		const generateButton = screen.getByRole('button', { name: /GENERATE/ })
+		const generateButton = screen.getByRole('button', { name: 'Generate password' })
 		fireEvent.click(generateButton)
 		expect(screen.getByTitle('Copy')).toBeInTheDocument()
 	})

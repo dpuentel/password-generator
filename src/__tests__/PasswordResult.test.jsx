@@ -67,4 +67,20 @@ describe('PasswordResult', () => {
 		const textElement = screen.getByText('test')
 		expect(textElement.className).toContain('underline')
 	})
+
+	it('has aria-label for copy button', () => {
+		render(<PasswordResult password="test" placeholder="P4$5W0rD!" />)
+		expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Copy password to clipboard')
+	})
+
+	it('has aria-live on password text', () => {
+		render(<PasswordResult password="test" placeholder="P4$5W0rD!" />)
+		const textElement = screen.getByText('test')
+		expect(textElement).toHaveAttribute('aria-live', 'polite')
+	})
+
+	it('has region role with aria-label', () => {
+		render(<PasswordResult password="test" placeholder="P4$5W0rD!" />)
+		expect(screen.getByRole('region')).toHaveAttribute('aria-label', 'Generated password')
+	})
 })

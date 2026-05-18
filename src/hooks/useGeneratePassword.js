@@ -6,19 +6,37 @@ import {
 	CharsetLowercase
 } from '../services/Patterns'
 
+const MIN_LENGTH = 4
+const MAX_LENGTH = 24
+
 export function useGeneratePassword () {
 	const [password, setPassword] = useState('')
 	const [length, setLength] = useState(10)
 	const [includeUppercase, setIncludeUppercase] = useState(false)
+	const [includeLowercase, setIncludeLowercase] = useState(true)
 	const [includeNumbers, setIncludeNumbers] = useState(false)
 	const [includeSymbols, setIncludeSymbols] = useState(false)
 
 	useEffect(() => {
 		generatePassword()
-	}, [includeUppercase, includeNumbers, includeSymbols, length])
+	}, [includeUppercase, includeLowercase, includeNumbers, includeSymbols, length])
+
+	const clampLength = (value) => {
+		const num = Number(value)
+		if (isNaN(num)) return MIN_LENGTH
+		return Math.min(MAX_LENGTH, Math.max(MIN_LENGTH, num))
+	}
+
+	const setLengthClamped = (value) => {
+		setLength(clampLength(value))
+	}
 
 	const generatePassword = () => {
 		const activePatterns = getActivePatterns()
+		if (activePatterns.length === 0) {
+			setPassword('')
+			return
+		}
 		const charactersByPattern = Math.floor(length / activePatterns.length)
 		let password = ''
 
@@ -40,7 +58,8 @@ export function useGeneratePassword () {
 	}
 
 	const getActivePatterns = () => {
-		const charsets = [CharsetLowercase]
+		const charsets = []
+		if (includeLowercase) charsets.push(CharsetLowercase)
 		if (includeUppercase) charsets.push(CharsetUppercase)
 		if (includeNumbers) charsets.push(CharsetNumbers)
 		if (includeSymbols) charsets.push(CharsetSymbols)
@@ -65,10 +84,12 @@ export function useGeneratePassword () {
 		password,
 		length,
 		includeUppercase,
+		includeLowercase,
 		includeNumbers,
 		includeSymbols,
-		setLength,
+		setLength: setLengthClamped,
 		setIncludeUppercase,
+		setIncludeLowercase,
 		setIncludeNumbers,
 		setIncludeSymbols,
 		generatePassword

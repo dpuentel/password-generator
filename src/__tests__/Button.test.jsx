@@ -16,4 +16,14 @@ describe('Button', () => {
 		await user.click(screen.getByRole('button'))
 		expect(handleClick).toHaveBeenCalledTimes(1)
 	})
+
+	it('has correct aria-label when provided', () => {
+		render(<Button text="Submit" onClick={() => {}} ariaLabel='Submit form' />)
+		expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Submit form')
+	})
+
+	it('falls back to text as aria-label when not provided', () => {
+		render(<Button text="Submit" onClick={() => {}} />)
+		expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Submit')
+	})
 })

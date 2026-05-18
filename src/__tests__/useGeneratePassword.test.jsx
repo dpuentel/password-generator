@@ -26,9 +26,37 @@ describe('useGeneratePassword', () => {
 		expect(result.current.password.length).toBe(16)
 	})
 
-	it('generates only lowercase when no toggles are active', () => {
+	it('initializes with lowercase enabled', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		expect(result.current.includeLowercase).toBe(true)
+	})
+
+	it('initializes with other toggles disabled', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		expect(result.current.includeUppercase).toBe(false)
+		expect(result.current.includeNumbers).toBe(false)
+		expect(result.current.includeSymbols).toBe(false)
+	})
+
+	it('generates only lowercase when no other toggles are active', () => {
 		const { result } = renderHook(() => useGeneratePassword())
 		expect(result.current.password).toMatch(/^[a-z]+$/)
+	})
+
+	it('generates empty password when all toggles are disabled', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeLowercase(false)
+		})
+		expect(result.current.password).toBe('')
+	})
+
+	it('includes lowercase when includeLowercase is true', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeUppercase(true)
+		})
+		expect(result.current.password).toMatch(/[a-z]/)
 	})
 
 	it('includes uppercase when includeUppercase is true', () => {
@@ -102,12 +130,44 @@ describe('useGeneratePassword', () => {
 		expect(result.current.length).toBe(20)
 	})
 
+	it('clamps length to minimum of 4', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setLength(1)
+		})
+		expect(result.current.length).toBe(4)
+	})
+
+	it('clamps length to maximum of 24', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setLength(50)
+		})
+		expect(result.current.length).toBe(24)
+	})
+
+	it('clamps length when value is NaN', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setLength(NaN)
+		})
+		expect(result.current.length).toBe(4)
+	})
+
 	it('setIncludeUppercase updates state', () => {
 		const { result } = renderHook(() => useGeneratePassword())
 		act(() => {
 			result.current.setIncludeUppercase(true)
 		})
 		expect(result.current.includeUppercase).toBe(true)
+	})
+
+	it('setIncludeLowercase updates state', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeLowercase(false)
+		})
+		expect(result.current.includeLowercase).toBe(false)
 	})
 
 	it('setIncludeNumbers updates state', () => {

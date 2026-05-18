@@ -1,4 +1,4 @@
-export default function RangeSlider({ min, max, value, onChange }) {
+export default function RangeSlider({ min, max, value, onChange, ariaLabel }) {
 	return (
 		<input
 			type='range'
@@ -6,6 +6,7 @@ export default function RangeSlider({ min, max, value, onChange }) {
 			value={value}
 			min={min}
 			max={max}
+			aria-label={ariaLabel}
 			className='
 				form-range
 				appearance-none
