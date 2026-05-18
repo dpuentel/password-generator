@@ -43,7 +43,7 @@ export default function PasswordGenerator() {
 					min='4'
 					max='24'
 					value={length}
-					onChange={(e) => setLength(e.target.value)}
+					onChange={(e) => setLength(Number(e.target.value))}
 					className='
 			form-range
 			appearance-none
