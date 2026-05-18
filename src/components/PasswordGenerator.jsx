@@ -13,6 +13,8 @@ export default function PasswordGenerator() {
 		setLength,
 		includeUppercase,
 		setIncludeUppercase,
+		includeLowercase,
+		setIncludeLowercase,
 		includeNumbers,
 		setIncludeNumbers,
 		includeSymbols,
@@ -22,6 +24,10 @@ export default function PasswordGenerator() {
 
 	const handleChangeCheckboxUpperCase = (e) => {
 		setIncludeUppercase(e.target.checked)
+	}
+
+	const handleChangeCheckboxLowerCase = (e) => {
+		setIncludeLowercase(e.target.checked)
 	}
 
 	const handleChangeCheckboxNumbers = (e) => {
@@ -44,6 +50,7 @@ export default function PasswordGenerator() {
 					max='24'
 					value={length}
 					onChange={(e) => setLength(Number(e.target.value))}
+					ariaLabel='Password length'
 					className='
 			form-range
 			appearance-none
@@ -54,6 +61,11 @@ export default function PasswordGenerator() {
 			focus:outline-none focus:ring-0 focus:shadow-none
 			col-span-2
 		'
+				/>
+				<CheckboxLabeled
+					label='Include Lowercase Letters'
+					checked={includeLowercase}
+					onChange={handleChangeCheckboxLowerCase}
 				/>
 				<CheckboxLabeled
 					label='Include Uppercase Letters'
@@ -71,7 +83,7 @@ export default function PasswordGenerator() {
 					onChange={handleChangeCheckboxSymbols}
 				/>
 				<PasswordStrength password={password} />
-				<Button onClick={generatePassword} text={'GENERATE 🡆'} />
+				<Button onClick={generatePassword} text={'GENERATE 🡆'} ariaLabel='Generate password' />
 			</article>
 		</section>
 	)

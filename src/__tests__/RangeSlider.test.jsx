@@ -30,4 +30,9 @@ describe('RangeSlider', () => {
 		fireEvent.change(slider, { target: { value: '15' } })
 		expect(handleChange).toHaveBeenCalledTimes(1)
 	})
+
+	it('has correct aria-label', () => {
+		render(<RangeSlider min="4" max="24" value={10} onChange={() => {}} ariaLabel='Password length' />)
+		expect(screen.getByRole('slider')).toHaveAttribute('aria-label', 'Password length')
+	})
 })
