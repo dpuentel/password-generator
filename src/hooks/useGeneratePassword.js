@@ -6,7 +6,7 @@ import {
 	PatternLowerCase
 } from '../services/Patterns'
 
-export function useGeneratePasword () {
+export function useGeneratePassword () {
 	const [password, setPassword] = useState('')
 	const [length, setLength] = useState(10)
 	const [includeUppercase, setIncludeUppercase] = useState(false)
@@ -18,20 +18,20 @@ export function useGeneratePasword () {
 	}, [includeUppercase, includeNumbers, includeSymbols, length])
 
 	const generatePassword = () => {
-		const charactersByPattern = Math.floor(length / getPatternsNumberActive())
 		const activePatterns = getActivePatterns()
-		let lastUsedPattern = null
+		const charactersByPattern = Math.floor(length / activePatterns.length)
 		let password = ''
 
-		activePatterns.forEach((pattern) => {
-			;[...Array(charactersByPattern)].forEach(() => {
-				password += getCharacterForPattern(pattern)
-				lastUsedPattern = pattern
-			})
+		activePatterns.forEach((charset) => {
+			for (let i = 0; i < charactersByPattern; i++) {
+				password += charset[getRandomInt(charset.length)]
+			}
 		})
 
-		while (password.length < length) {
-			password += getCharacterForPattern(lastUsedPattern)
+		const remainingChars = length - password.length
+		const lastCharset = activePatterns[activePatterns.length - 1]
+		for (let i = 0; i < remainingChars; i++) {
+			password += lastCharset[getRandomInt(lastCharset.length)]
 		}
 
 		password = shuffle([...password]).join('')
@@ -39,39 +39,26 @@ export function useGeneratePasword () {
 		setPassword(password)
 	}
 
-	const getPatternsNumberActive = () => {
-		return [includeNumbers, includeSymbols, includeUppercase].filter(Boolean).length + 1
-	}
-
 	const getActivePatterns = () => {
-		const activePatterns = []
-		activePatterns.push(new RegExp(`[${PatternLowerCase}]`))
-		if (includeUppercase) {
-			activePatterns.push(new RegExp(`[${PatternUppercase}]`))
-		}
-		if (includeNumbers) activePatterns.push(new RegExp(`[${PatternNumbers}]`))
-		if (includeSymbols) activePatterns.push(new RegExp(`[${PatternSymbols}]`))
-		return activePatterns
-	}
-
-	const getCharacterForPattern = (pattern) => {
-		let result
-		while (true) {
-			result = String.fromCharCode(getRandom())
-			if (pattern.test(result)) {
-				return result
-			}
-		}
+		const charsets = [PatternLowerCase]
+		if (includeUppercase) charsets.push(PatternUppercase)
+		if (includeNumbers) charsets.push(PatternNumbers)
+		if (includeSymbols) charsets.push(PatternSymbols)
+		return charsets
 	}
 
 	const shuffle = (array) => {
-		return array.sort(() => getRandom() - 128)
+		for (let i = array.length - 1; i > 0; i--) {
+			const j = getRandomInt(i + 1)
+			;[array[i], array[j]] = [array[j], array[i]]
+		}
+		return array
 	}
 
-	const getRandom = () => {
-		const result = new Uint8Array(1)
+	const getRandomInt = (max) => {
+		const result = new Uint32Array(1)
 		window.crypto.getRandomValues(result)
-		return result[0]
+		return result[0] % max
 	}
 
 	return {
