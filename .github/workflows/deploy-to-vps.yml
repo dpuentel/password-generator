@@ -43,7 +43,7 @@ jobs:
             MAX_RETRIES=3
             RETRY_COUNT=0
             while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-              if pnpm install --prod --config.minimum-release-age=0; then
+              if pnpm install --prod; then
                 echo "✅ Dependencies installed successfully"
                 break
               fi
