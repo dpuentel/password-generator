@@ -143,12 +143,12 @@ describe('useGeneratePassword', () => {
 		expect(result.current.length).toBe(4)
 	})
 
-	it('clamps length to maximum of 24', () => {
+	it('clamps length to maximum of 64', () => {
 		const { result } = renderHook(() => useGeneratePassword())
 		act(() => {
-			result.current.setLength(50)
+			result.current.setLength(100)
 		})
-		expect(result.current.length).toBe(24)
+		expect(result.current.length).toBe(64)
 	})
 
 	it('clamps length when value is NaN', () => {

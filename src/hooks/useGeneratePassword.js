@@ -7,7 +7,7 @@ import {
 } from '../services/Patterns'
 
 const MIN_LENGTH = 4
-const MAX_LENGTH = 24
+const MAX_LENGTH = 64
 
 export function useGeneratePassword() {
 	const [password, setPassword] = useState('')

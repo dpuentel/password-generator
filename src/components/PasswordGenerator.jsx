@@ -47,7 +47,7 @@ export default function PasswordGenerator() {
 				<PasswordLength length={length} />
 				<RangeSlider
 					min='4'
-					max='24'
+					max='64'
 					value={length}
 					onChange={(e) => setLength(Number(e.target.value))}
 					ariaLabel='Password length'
