@@ -1,4 +1,4 @@
-import { PasswordEntropyCalculator } from './PasswordEntropyCalculator'
+import { PasswordEntropyCalculator } from '../services/PasswordEntropyCalculator'
 
 const MAX_ENTROPY = 426
 const STRENGTH_BARS = 10

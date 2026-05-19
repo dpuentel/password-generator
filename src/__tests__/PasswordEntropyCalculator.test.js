@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { PasswordEntropyCalculator } from '../components/PasswordEntropyCalculator'
+import { PasswordEntropyCalculator } from '../services/PasswordEntropyCalculator'
 
 describe('PasswordEntropyCalculator', () => {
 	it('returns 0 for empty string', () => {
