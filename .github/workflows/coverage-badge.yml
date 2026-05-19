@@ -25,11 +25,13 @@ jobs:
           cache: "pnpm"
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test:coverage 2>&1 | tee coverage-output.txt
+      - run: |
+          pnpm test:coverage > coverage-output.txt 2>&1
+          cat coverage-output.txt
 
       - name: Extract coverage and generate badge
         run: |
-          COVERAGE=$(grep "Statements" coverage-output.txt | grep -oP '\d+\.\d+' | head -1)
+          COVERAGE=$(grep -E "^\s*All files" coverage-output.txt | grep -oP '\d+\.\d+' | head -1)
           COVERAGE_INT=$(echo "$COVERAGE" | cut -d. -f1)
 
           if [ "$COVERAGE_INT" -ge 90 ]; then
