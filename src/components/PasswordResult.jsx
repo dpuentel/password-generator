@@ -30,13 +30,13 @@ export default function PasswordResult({ password, placeholder }) {
 
 	return (
 		<div
-			className='bg-slate-800 w-full p-4 items-center text-gray-500'
+			className='bg-slate-800 w-full p-4 flex items-center gap-2 text-gray-500'
 			role='region'
 			aria-label='Generated password'
 		>
 			<span
 				onClick={handleSelect}
-				className={`text-lg ${passwordColor} ${isCopied ? 'underline' : ''} font-bold cursor-pointer select-all`}
+				className={`text-lg ${passwordColor} ${isCopied ? 'underline' : ''} font-bold cursor-pointer select-all min-w-0 break-all`}
 				aria-live='polite'
 				aria-label={password ? 'Click to select password' : undefined}
 			>
@@ -44,7 +44,7 @@ export default function PasswordResult({ password, placeholder }) {
 			</span>
 			<button
 				onClick={handleCopy}
-				className='w-5 float-right hover:text-gray-300'
+				className='w-5 shrink-0 hover:text-gray-300'
 				aria-label='Copy password to clipboard'
 			>
 				{hasError ? (
