@@ -41,7 +41,7 @@ export default function PasswordGenerator() {
 	return (
 		<section className='grid grid-cols-1 gap-4 place-items-center'>
 			<article className='w-80'>
-				<PasswordResult password={password} placeholder='P4$5W0rD!' size='5' />
+				<PasswordResult password={password} placeholder='P4$5W0rD!' />
 			</article>
 			<article className='bg-slate-800 min-w-48 w-80 p-4 grid grid-cols-1 gap-4 text-xs'>
 				<PasswordLength length={length} />
@@ -51,16 +51,6 @@ export default function PasswordGenerator() {
 					value={length}
 					onChange={(e) => setLength(Number(e.target.value))}
 					ariaLabel='Password length'
-					className='
-			form-range
-			appearance-none
-			w-full
-			h-6
-			p-0
-			bg-transparent
-			focus:outline-none focus:ring-0 focus:shadow-none
-			col-span-2
-		'
 				/>
 				<CheckboxLabeled
 					label='Include Lowercase Letters'

@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest'
 import {
-	PatternSymbols,
-	PatternNumbers,
-	PatternUppercase,
-	PatternLowerCase,
 	CharsetSymbols,
 	CharsetNumbers,
 	CharsetUppercase,
@@ -11,24 +7,6 @@ import {
 } from '../services/Patterns'
 
 describe('Patterns', () => {
-	describe('Pattern constants (regex ranges)', () => {
-		it('PatternSymbols contains regex range for symbols', () => {
-			expect(PatternSymbols).toBe('!-/:-@[-`{-~')
-		})
-
-		it('PatternNumbers contains regex range for digits', () => {
-			expect(PatternNumbers).toBe('0-9')
-		})
-
-		it('PatternUppercase contains regex range for uppercase', () => {
-			expect(PatternUppercase).toBe('A-Z')
-		})
-
-		it('PatternLowerCase contains regex range for lowercase', () => {
-			expect(PatternLowerCase).toBe('a-z')
-		})
-	})
-
 	describe('Charset constants (expanded character sets)', () => {
 		it('CharsetLowercase contains 26 lowercase letters', () => {
 			expect(CharsetLowercase).toBe('abcdefghijklmnopqrstuvwxyz')
