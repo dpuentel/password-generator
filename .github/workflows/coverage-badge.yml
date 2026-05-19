@@ -1,0 +1,53 @@
+name: Coverage Badge
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  coverage:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:coverage 2>&1 | tee coverage-output.txt
+
+      - name: Extract coverage and generate badge
+        run: |
+          COVERAGE=$(grep "Statements" coverage-output.txt | grep -oP '\d+\.\d+' | head -1)
+          COVERAGE_INT=$(echo "$COVERAGE" | cut -d. -f1)
+
+          if [ "$COVERAGE_INT" -ge 90 ]; then
+            COLOR="brightgreen"
+          elif [ "$COVERAGE_INT" -ge 75 ]; then
+            COLOR="green"
+          elif [ "$COVERAGE_INT" -ge 50 ]; then
+            COLOR="yellow"
+          else
+            COLOR="red"
+          fi
+
+          cat > coverage.json << EOF
+          {
+            "schemaVersion": 1,
+            "label": "coverage",
+            "message": "${COVERAGE}%",
+            "color": "${COLOR}"
+          }
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add coverage.json
+          git commit -m "chore: update coverage badge to ${COVERAGE}%" || exit 0
+          git push
