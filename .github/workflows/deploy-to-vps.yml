@@ -3,23 +3,26 @@ name: Deploy to VPS
 on:
   push:
     branches: ["main"]
-
   workflow_dispatch:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Deploy
     steps:
-      - name: Deploy using ssh
-        id: deployment
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          port: 22
-          script: |
+      - name: Deploy to VPS
+        env:
+          SSH_KEY: ${{ secrets.PRIVATE_KEY }}
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+        run: |
+          echo "$SSH_KEY" > /tmp/deploy_key
+          chmod 600 /tmp/deploy_key
+
+          ssh -o StrictHostKeyChecking=no \
+              -i /tmp/deploy_key \
+              -p 22 \
+              "$USERNAME@$HOST" << 'REMOTE_SCRIPT'
             set -e
 
             echo "🚀 Starting deployment..."
@@ -56,7 +59,6 @@ jobs:
 
             if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
               echo "❌ Failed to install dependencies after $MAX_RETRIES attempts"
-              echo "::error::Failed to install dependencies after $MAX_RETRIES attempts"
               exit 1
             fi
 
@@ -64,4 +66,6 @@ jobs:
             pnpm run build
 
             echo "✅ Deployment completed successfully 🎉"
-          debug: true
+          REMOTE_SCRIPT
+
+          rm -f /tmp/deploy_key
