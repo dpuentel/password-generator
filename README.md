@@ -1,6 +1,6 @@
 # Password Generator
 
-[![Deploy to VPS](https://github.com/dpuentel/password-generator/actions/workflows/deploy-to-vps.yml/badge.svg)](https://github.com/dpuentel/password-generator/actions/workflows/deploy-to-vps.yml)
+[![Deploy](https://github.com/dpuentel/password-generator/actions/workflows/deploy-to-vps.yml/badge.svg)](https://github.com/dpuentel/password-generator/actions/workflows/deploy-to-vps.yml)
 ![coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/dpuentel/password-generator/main/coverage.json)
 
 You can test a **[demo here](https://password-generator.dpuentel.com/)**.
