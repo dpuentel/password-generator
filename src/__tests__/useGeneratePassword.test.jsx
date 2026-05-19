@@ -257,4 +257,86 @@ describe('useGeneratePassword', () => {
 		const hasAmbiguous = /[ILO01]/.test(password)
 		expect(hasAmbiguous).toBe(true)
 	})
+
+	it('can disable lowercase when numbers are also active', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeNumbers(true)
+		})
+		act(() => {
+			result.current.setIncludeLowercase(false)
+		})
+		expect(result.current.includeLowercase).toBe(false)
+		expect(result.current.password).toMatch(/^[0-9]+$/)
+	})
+
+	it('can disable lowercase when symbols are also active', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeSymbols(true)
+		})
+		act(() => {
+			result.current.setIncludeLowercase(false)
+		})
+		expect(result.current.includeLowercase).toBe(false)
+		expect(result.current.password).not.toMatch(/[a-z]/)
+	})
+
+	it('excludes ambiguous symbols when enabled with symbols', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeSymbols(true)
+			result.current.setExcludeAmbiguous(true)
+			result.current.setLength(64)
+		})
+		expect(result.current.password).not.toMatch(/[ilo]/)
+	})
+
+	it('excludes ambiguous from all charsets when all enabled', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeUppercase(true)
+			result.current.setIncludeNumbers(true)
+			result.current.setIncludeSymbols(true)
+			result.current.setExcludeAmbiguous(true)
+			result.current.setLength(64)
+		})
+		const password = result.current.password
+		expect(password).not.toMatch(/[iloILO01]/)
+	})
+
+	it('getActiveCharsetCount works with lowercase disabled', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeUppercase(true)
+			result.current.setIncludeNumbers(true)
+		})
+		act(() => {
+			result.current.setIncludeLowercase(false)
+		})
+		act(() => {
+			result.current.setIncludeNumbers(false)
+		})
+		expect(result.current.includeLowercase).toBe(false)
+		expect(result.current.includeNumbers).toBe(false)
+		expect(result.current.includeUppercase).toBe(true)
+	})
+
+	it('excludes ambiguous with lowercase disabled', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeUppercase(true)
+			result.current.setIncludeNumbers(true)
+		})
+		act(() => {
+			result.current.setIncludeLowercase(false)
+		})
+		act(() => {
+			result.current.setExcludeAmbiguous(true)
+			result.current.setLength(64)
+		})
+		const password = result.current.password
+		expect(password).not.toMatch(/[a-z]/)
+		expect(password).not.toMatch(/[ILO01]/)
+	})
 })
