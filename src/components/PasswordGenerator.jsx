@@ -22,21 +22,8 @@ export default function PasswordGenerator() {
 		generatePassword
 	} = useGeneratePassword()
 
-	const handleChangeCheckboxUpperCase = (e) => {
-		setIncludeUppercase(e.target.checked)
-	}
-
-	const handleChangeCheckboxLowerCase = (e) => {
-		setIncludeLowercase(e.target.checked)
-	}
-
-	const handleChangeCheckboxNumbers = (e) => {
-		setIncludeNumbers(e.target.checked)
-	}
-
-	const handleChangeCheckboxSymbols = (e) => {
-		setIncludeSymbols(e.target.checked)
-	}
+	const activeCount = [includeLowercase, includeUppercase, includeNumbers, includeSymbols].filter(Boolean).length
+	const isLastCharset = activeCount <= 1
 
 	return (
 		<section className='grid grid-cols-1 gap-4 place-items-center'>
@@ -55,22 +42,26 @@ export default function PasswordGenerator() {
 				<CheckboxLabeled
 					label='Include Lowercase Letters'
 					checked={includeLowercase}
-					onChange={handleChangeCheckboxLowerCase}
+					onChange={(e) => setIncludeLowercase(e.target.checked)}
+					disabled={includeLowercase && isLastCharset}
 				/>
 				<CheckboxLabeled
 					label='Include Uppercase Letters'
 					checked={includeUppercase}
-					onChange={handleChangeCheckboxUpperCase}
+					onChange={(e) => setIncludeUppercase(e.target.checked)}
+					disabled={includeUppercase && isLastCharset}
 				/>
 				<CheckboxLabeled
 					label='Include Numbers'
 					checked={includeNumbers}
-					onChange={handleChangeCheckboxNumbers}
+					onChange={(e) => setIncludeNumbers(e.target.checked)}
+					disabled={includeNumbers && isLastCharset}
 				/>
 				<CheckboxLabeled
 					label='Include Symbols'
 					checked={includeSymbols}
-					onChange={handleChangeCheckboxSymbols}
+					onChange={(e) => setIncludeSymbols(e.target.checked)}
+					disabled={includeSymbols && isLastCharset}
 				/>
 				<PasswordStrength password={password} />
 				<Button onClick={generatePassword} text={'GENERATE 🡆'} ariaLabel='Generate password' />

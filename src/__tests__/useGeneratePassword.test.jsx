@@ -48,12 +48,13 @@ describe('useGeneratePassword', () => {
 		expect(result.current.password).toMatch(/^[a-z]+$/)
 	})
 
-	it('generates empty password when all toggles are disabled', () => {
+	it('cannot disable the last active charset', () => {
 		const { result } = renderHook(() => useGeneratePassword())
 		act(() => {
 			result.current.setIncludeLowercase(false)
 		})
-		expect(result.current.password).toBe('')
+		expect(result.current.includeLowercase).toBe(true)
+		expect(result.current.password).not.toBe('')
 	})
 
 	it('includes lowercase when includeLowercase is true', () => {
@@ -167,12 +168,23 @@ describe('useGeneratePassword', () => {
 		expect(result.current.includeUppercase).toBe(true)
 	})
 
-	it('setIncludeLowercase updates state', () => {
+	it('setIncludeLowercase updates state when another charset is active', () => {
 		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeUppercase(true)
+		})
 		act(() => {
 			result.current.setIncludeLowercase(false)
 		})
 		expect(result.current.includeLowercase).toBe(false)
+	})
+
+	it('setIncludeLowercase is blocked when it is the only active charset', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeLowercase(false)
+		})
+		expect(result.current.includeLowercase).toBe(true)
 	})
 
 	it('setIncludeNumbers updates state', () => {

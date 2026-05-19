@@ -31,6 +31,20 @@ export function useGeneratePassword() {
 		setLength(clampLength(value))
 	}
 
+	const getActiveCharsetCount = () => {
+		let count = 0
+		if (includeLowercase) count++
+		if (includeUppercase) count++
+		if (includeNumbers) count++
+		if (includeSymbols) count++
+		return count
+	}
+
+	const safeSetCharset = (setter, currentValue) => (newValue) => {
+		if (!newValue && getActiveCharsetCount() <= 1) return
+		setter(newValue)
+	}
+
 	const generatePassword = () => {
 		const activePatterns = getActivePatterns()
 		if (activePatterns.length === 0) {
@@ -88,10 +102,10 @@ export function useGeneratePassword() {
 		includeNumbers,
 		includeSymbols,
 		setLength: setLengthClamped,
-		setIncludeUppercase,
-		setIncludeLowercase,
-		setIncludeNumbers,
-		setIncludeSymbols,
+		setIncludeUppercase: safeSetCharset(setIncludeUppercase, includeUppercase),
+		setIncludeLowercase: safeSetCharset(setIncludeLowercase, includeLowercase),
+		setIncludeNumbers: safeSetCharset(setIncludeNumbers, includeNumbers),
+		setIncludeSymbols: safeSetCharset(setIncludeSymbols, includeSymbols),
 		generatePassword
 	}
 }
