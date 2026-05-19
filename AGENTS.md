@@ -6,14 +6,16 @@ Password Generator — an Astro + React static site with TailwindCSS. Generates 
 
 ## Tech Stack
 
-- **Astro 2.1** — Static site generator
-- **React 18** — Interactive UI components
-- **TailwindCSS 3** — Styling
-- **Vitest + Testing Library** — Testing
+- **Astro 6.3** — Static site generator
+- **React 19** — Interactive UI components
+- **TailwindCSS 4** — Styling (via `@tailwindcss/vite`, CSS-first config)
+- **Vitest 4 + Testing Library** — Testing
+- **ESLint 10** — Linting (flat config via `neostandard`)
+- **Prettier 3** — Code formatting
 
 ## Code Style
 
-- **StandardJS** — JavaScript style guide. Enforced via ESLint (`standard` config in `.eslintrc`).
+- **neostandard** — JavaScript style guide (flat config, ESLint 10 compatible).
 - **Prettier** — Code formatting. Run `pnpm run format` before committing.
 - **Tabs** for indentation, **single quotes**, **semicolons omitted**.
 - No comments unless explicitly requested.

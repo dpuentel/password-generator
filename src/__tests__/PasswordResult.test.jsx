@@ -12,22 +12,22 @@ describe('PasswordResult', () => {
 	})
 
 	it('renders placeholder when no password is provided', () => {
-		render(<PasswordResult password="" placeholder="P4$5W0rD!" />)
+		render(<PasswordResult password='' placeholder='P4$5W0rD!' />)
 		expect(screen.getByText('P4$5W0rD!')).toBeInTheDocument()
 	})
 
 	it('renders password when provided', () => {
-		render(<PasswordResult password="abc123" placeholder="P4$5W0rD!" />)
+		render(<PasswordResult password='abc123' placeholder='P4$5W0rD!' />)
 		expect(screen.getByText('abc123')).toBeInTheDocument()
 	})
 
 	it('shows copy icon initially', () => {
-		render(<PasswordResult password="test" placeholder="P4$5W0rD!" />)
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
 		expect(screen.getByTitle('Copy')).toBeInTheDocument()
 	})
 
 	it('calls navigator.clipboard.writeText on copy', async () => {
-		render(<PasswordResult password="secret123" placeholder="P4$5W0rD!" />)
+		render(<PasswordResult password='secret123' placeholder='P4$5W0rD!' />)
 		fireEvent.click(screen.getByRole('button'))
 		await act(async () => {
 			await Promise.resolve()
@@ -36,7 +36,7 @@ describe('PasswordResult', () => {
 	})
 
 	it('shows check icon after copying', async () => {
-		render(<PasswordResult password="test" placeholder="P4$5W0rD!" />)
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
 		fireEvent.click(screen.getByRole('button'))
 		await act(async () => {
 			await Promise.resolve()
@@ -45,7 +45,7 @@ describe('PasswordResult', () => {
 	})
 
 	it('reverts to copy icon after 1 second', async () => {
-		render(<PasswordResult password="test" placeholder="P4$5W0rD!" />)
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
 		fireEvent.click(screen.getByRole('button'))
 		await act(async () => {
 			await Promise.resolve()
@@ -59,7 +59,7 @@ describe('PasswordResult', () => {
 	})
 
 	it('applies underline class when copied', async () => {
-		render(<PasswordResult password="test" placeholder="P4$5W0rD!" />)
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
 		fireEvent.click(screen.getByRole('button'))
 		await act(async () => {
 			await Promise.resolve()
@@ -69,18 +69,18 @@ describe('PasswordResult', () => {
 	})
 
 	it('has aria-label for copy button', () => {
-		render(<PasswordResult password="test" placeholder="P4$5W0rD!" />)
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
 		expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Copy password to clipboard')
 	})
 
 	it('has aria-live on password text', () => {
-		render(<PasswordResult password="test" placeholder="P4$5W0rD!" />)
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
 		const textElement = screen.getByText('test')
 		expect(textElement).toHaveAttribute('aria-live', 'polite')
 	})
 
 	it('has region role with aria-label', () => {
-		render(<PasswordResult password="test" placeholder="P4$5W0rD!" />)
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
 		expect(screen.getByRole('region')).toHaveAttribute('aria-label', 'Generated password')
 	})
 })

@@ -9,7 +9,7 @@ import {
 const MIN_LENGTH = 4
 const MAX_LENGTH = 24
 
-export function useGeneratePassword () {
+export function useGeneratePassword() {
 	const [password, setPassword] = useState('')
 	const [length, setLength] = useState(10)
 	const [includeUppercase, setIncludeUppercase] = useState(false)
