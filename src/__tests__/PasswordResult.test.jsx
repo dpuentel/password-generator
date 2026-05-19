@@ -83,4 +83,29 @@ describe('PasswordResult', () => {
 		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
 		expect(screen.getByRole('region')).toHaveAttribute('aria-label', 'Generated password')
 	})
+
+	it('shows error indicator when clipboard write fails', async () => {
+		navigator.clipboard.writeText.mockRejectedValueOnce(new Error('Clipboard error'))
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
+		fireEvent.click(screen.getByRole('button'))
+		await act(async () => {
+			await Promise.resolve()
+		})
+		expect(screen.getByLabelText('Copy failed')).toBeInTheDocument()
+	})
+
+	it('reverts error indicator after 1 second', async () => {
+		navigator.clipboard.writeText.mockRejectedValueOnce(new Error('Clipboard error'))
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
+		fireEvent.click(screen.getByRole('button'))
+		await act(async () => {
+			await Promise.resolve()
+		})
+		expect(screen.getByLabelText('Copy failed')).toBeInTheDocument()
+
+		act(() => {
+			vi.advanceTimersByTime(1000)
+		})
+		expect(screen.queryByLabelText('Copy failed')).not.toBeInTheDocument()
+	})
 })
