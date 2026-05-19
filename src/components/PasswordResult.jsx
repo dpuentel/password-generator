@@ -36,7 +36,7 @@ export default function PasswordResult({ password, placeholder }) {
 		>
 			<span
 				onClick={handleSelect}
-				className={`text-lg ${passwordColor} ${isCopied ? 'underline' : ''} font-bold cursor-pointer select-all min-w-0 break-all`}
+				className={`text-lg ${passwordColor} ${isCopied ? 'underline' : ''} font-bold cursor-pointer select-all min-w-0 break-all grow`}
 				aria-live='polite'
 				aria-label={password ? 'Click to select password' : undefined}
 			>
@@ -44,7 +44,7 @@ export default function PasswordResult({ password, placeholder }) {
 			</span>
 			<button
 				onClick={handleCopy}
-				className='w-5 shrink-0 hover:text-gray-300'
+				className='w-5 shrink-0 hover:text-gray-300 ml-auto'
 				aria-label='Copy password to clipboard'
 			>
 				{hasError ? (
