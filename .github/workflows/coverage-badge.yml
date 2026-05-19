@@ -31,7 +31,7 @@ jobs:
 
       - name: Extract coverage and generate badge
         run: |
-          COVERAGE=$(grep -E "^\s*All files" coverage-output.txt | grep -oP '\d+\.\d+' | head -1)
+          COVERAGE=$(grep -E "^\s*All files" coverage-output.txt | grep -oP '\d+(\.\d+)?' | head -1)
           COVERAGE_INT=$(echo "$COVERAGE" | cut -d. -f1)
 
           if [ "$COVERAGE_INT" -ge 90 ]; then
