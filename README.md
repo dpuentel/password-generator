@@ -1,6 +1,8 @@
 # Password Generator
 
-You can test a ** [demo here](https://password-generator.dpuentel.com/) **.
+[![Deploy to VPS](https://github.com/dpuentel/password-generator/actions/workflows/deploy-to-vps.yml/badge.svg)](https://github.com/dpuentel/password-generator/actions/workflows/deploy-to-vps.yml)
+
+You can test a **[demo here](https://password-generator.dpuentel.com/)**.
 
 [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/dpuentel/password-generator/tree/main)
 [![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/s/github/dpuentel/password-generator/tree/main)
@@ -15,7 +17,7 @@ Generates cryptographically secure passwords using `window.crypto.getRandomValue
 
 | Package | Version |
 |---------|---------|
-| [Astro](https://astro.build/) | 6.3.3 |
+| [Astro](https://astro.build/) | 6.3.5 |
 | [React](https://reactjs.org/) | 19.2.6 |
 | [TailwindCSS](https://tailwindcss.com/) | 4.3.0 |
 | [Vitest](https://vitest.dev/) | 4.1.6 |
