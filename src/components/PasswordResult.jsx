@@ -22,6 +22,12 @@ export default function PasswordResult({ password, placeholder }) {
 		}
 	}
 
+	const handleSelect = (e) => {
+		if (password) {
+			window.getSelection().selectAllChildren(e.currentTarget)
+		}
+	}
+
 	return (
 		<div
 			className='bg-slate-800 w-full p-4 items-center text-gray-500'
@@ -29,8 +35,10 @@ export default function PasswordResult({ password, placeholder }) {
 			aria-label='Generated password'
 		>
 			<span
-				className={`text-lg ${passwordColor} ${isCopied ? 'underline' : ''} font-bold`}
+				onClick={handleSelect}
+				className={`text-lg ${passwordColor} ${isCopied ? 'underline' : ''} font-bold cursor-pointer select-all`}
 				aria-live='polite'
+				aria-label={password ? 'Click to select password' : undefined}
 			>
 				{password || placeholder}
 			</span>
