@@ -21,6 +21,7 @@ jobs:
           node-version: 24
           cache: "pnpm"
 
+      - run: corepack enable
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:coverage 2>&1 | tee coverage-output.txt
 
