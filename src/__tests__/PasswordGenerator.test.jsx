@@ -29,11 +29,19 @@ describe('PasswordGenerator', () => {
 		expect(checkbox).toBeChecked()
 	})
 
-	it('toggling lowercase checkbox updates state', () => {
+	it('lowercase checkbox is disabled when it is the only active charset', () => {
 		render(<PasswordGenerator />)
 		const checkbox = screen.getByLabelText('Include Lowercase Letters')
-		fireEvent.click(checkbox)
-		expect(checkbox).not.toBeChecked()
+		expect(checkbox).toBeDisabled()
+	})
+
+	it('lowercase checkbox can be unchecked when another charset is active', () => {
+		render(<PasswordGenerator />)
+		const uppercaseCheckbox = screen.getByLabelText('Include Uppercase Letters')
+		fireEvent.click(uppercaseCheckbox)
+		const lowercaseCheckbox = screen.getByLabelText('Include Lowercase Letters')
+		fireEvent.click(lowercaseCheckbox)
+		expect(lowercaseCheckbox).not.toBeChecked()
 	})
 
 	it('toggling uppercase checkbox updates state', () => {
@@ -71,5 +79,19 @@ describe('PasswordGenerator', () => {
 		const generateButton = screen.getByRole('button', { name: 'Generate password' })
 		fireEvent.click(generateButton)
 		expect(screen.getByTitle('Copy')).toBeInTheDocument()
+	})
+
+	it('slider changes password length', () => {
+		render(<PasswordGenerator />)
+		const slider = screen.getByRole('slider')
+		fireEvent.change(slider, { target: { value: '20' } })
+		expect(slider.value).toBe('20')
+	})
+
+	it('toggling exclude ambiguous checkbox updates state', () => {
+		render(<PasswordGenerator />)
+		const checkbox = screen.getByLabelText('Exclude Ambiguous Characters (0OIl1|)')
+		fireEvent.click(checkbox)
+		expect(checkbox).toBeChecked()
 	})
 })

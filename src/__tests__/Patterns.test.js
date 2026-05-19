@@ -1,34 +1,16 @@
 import { describe, it, expect } from 'vitest'
 import {
-	PatternSymbols,
-	PatternNumbers,
-	PatternUppercase,
-	PatternLowerCase,
 	CharsetSymbols,
 	CharsetNumbers,
 	CharsetUppercase,
-	CharsetLowercase
+	CharsetLowercase,
+	CharsetSymbolsNoAmbiguous,
+	CharsetNumbersNoAmbiguous,
+	CharsetUppercaseNoAmbiguous,
+	CharsetLowercaseNoAmbiguous
 } from '../services/Patterns'
 
 describe('Patterns', () => {
-	describe('Pattern constants (regex ranges)', () => {
-		it('PatternSymbols contains regex range for symbols', () => {
-			expect(PatternSymbols).toBe('!-/:-@[-`{-~')
-		})
-
-		it('PatternNumbers contains regex range for digits', () => {
-			expect(PatternNumbers).toBe('0-9')
-		})
-
-		it('PatternUppercase contains regex range for uppercase', () => {
-			expect(PatternUppercase).toBe('A-Z')
-		})
-
-		it('PatternLowerCase contains regex range for lowercase', () => {
-			expect(PatternLowerCase).toBe('a-z')
-		})
-	})
-
 	describe('Charset constants (expanded character sets)', () => {
 		it('CharsetLowercase contains 26 lowercase letters', () => {
 			expect(CharsetLowercase).toBe('abcdefghijklmnopqrstuvwxyz')
@@ -60,6 +42,27 @@ describe('Patterns', () => {
 
 		it('CharsetNumbers contains only 0-9 characters', () => {
 			expect(CharsetNumbers).toMatch(/^[0-9]+$/)
+		})
+	})
+
+	describe('No Ambiguous Charset constants', () => {
+		it('CharsetLowercaseNoAmbiguous excludes i, l, o', () => {
+			expect(CharsetLowercaseNoAmbiguous).not.toMatch(/[ilo]/)
+			expect(CharsetLowercaseNoAmbiguous.length).toBe(23)
+		})
+
+		it('CharsetUppercaseNoAmbiguous excludes I, L, O', () => {
+			expect(CharsetUppercaseNoAmbiguous).not.toMatch(/[ILO]/)
+			expect(CharsetUppercaseNoAmbiguous.length).toBe(23)
+		})
+
+		it('CharsetNumbersNoAmbiguous excludes 0 and 1', () => {
+			expect(CharsetNumbersNoAmbiguous).not.toMatch(/[01]/)
+			expect(CharsetNumbersNoAmbiguous.length).toBe(8)
+		})
+
+		it('CharsetSymbolsNoAmbiguous matches regular CharsetSymbols', () => {
+			expect(CharsetSymbolsNoAmbiguous).toBe(CharsetSymbols)
 		})
 	})
 })

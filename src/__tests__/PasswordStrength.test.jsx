@@ -18,27 +18,54 @@ describe('PasswordStrength', () => {
 		render(<PasswordStrength password='' />)
 		const bars = document.querySelectorAll('.grid-cols-10 span')
 		const filledBars = Array.from(bars).filter(
-			(bar) => bar.className && bar.className.includes('bg-gray-300')
+			(bar) => bar.className && !bar.className.includes('bg-slate-900')
 		)
 		expect(filledBars.length).toBe(0)
 	})
 
-	it('shows some filled bars for a weak password', () => {
-		render(<PasswordStrength password='abc' />)
+	it('shows Weak label for low entropy passwords', () => {
+		render(<PasswordStrength password='ab' />)
+		expect(screen.getByText('Weak')).toBeInTheDocument()
+	})
+
+	it('shows Fair label for medium entropy passwords', () => {
+		render(<PasswordStrength password='abcdefghijAB1' />)
+		expect(screen.getByText('Fair')).toBeInTheDocument()
+	})
+
+	it('shows Strong label for high entropy passwords', () => {
+		render(<PasswordStrength password='aB1!xY9@kL' />)
+		expect(screen.getByText('Strong')).toBeInTheDocument()
+	})
+
+	it('shows Very Strong label for very high entropy passwords', () => {
+		render(<PasswordStrength password='aB1!xY9@kL2#mN4&Pq6*rT8!' />)
+		expect(screen.getByText('Very Strong')).toBeInTheDocument()
+	})
+
+	it('shows no strength label for empty password', () => {
+		render(<PasswordStrength password='' />)
+		expect(screen.queryByText('Weak')).not.toBeInTheDocument()
+		expect(screen.queryByText('Fair')).not.toBeInTheDocument()
+		expect(screen.queryByText('Strong')).not.toBeInTheDocument()
+		expect(screen.queryByText('Very Strong')).not.toBeInTheDocument()
+	})
+
+	it('uses red color for Weak', () => {
+		render(<PasswordStrength password='ab' />)
 		const bars = document.querySelectorAll('.grid-cols-10 span')
 		const filledBars = Array.from(bars).filter(
-			(bar) => bar.className && bar.className.includes('bg-gray-300')
+			(bar) => bar.className && bar.className.includes('bg-red-500')
 		)
 		expect(filledBars.length).toBeGreaterThan(0)
 	})
 
-	it('shows more filled bars for a strong password than a weak one', () => {
-		const { rerender } = render(<PasswordStrength password='ab' />)
-		const weakBars = document.querySelectorAll('.grid-cols-10 span.bg-gray-300').length
-
-		rerender(<PasswordStrength password='aB1!xY9@kL2#' />)
-		const strongBars = document.querySelectorAll('.grid-cols-10 span.bg-gray-300').length
-
-		expect(strongBars).toBeGreaterThan(weakBars)
+	it('uses green color for Very Strong', () => {
+		render(<PasswordStrength password='aB1!xY9@kL2#mN4&Pq6*rT8!' />)
+		const bars = document.querySelectorAll('.grid-cols-10 span')
+		const filledBars = Array.from(bars).filter(
+			(bar) => bar.className && bar.className.includes('bg-green-500')
+		)
+		expect(filledBars.length).toBeGreaterThan(0)
 	})
 })
