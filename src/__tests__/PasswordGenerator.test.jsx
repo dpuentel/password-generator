@@ -80,4 +80,18 @@ describe('PasswordGenerator', () => {
 		fireEvent.click(generateButton)
 		expect(screen.getByTitle('Copy')).toBeInTheDocument()
 	})
+
+	it('slider changes password length', () => {
+		render(<PasswordGenerator />)
+		const slider = screen.getByRole('slider')
+		fireEvent.change(slider, { target: { value: '20' } })
+		expect(slider.value).toBe('20')
+	})
+
+	it('toggling exclude ambiguous checkbox updates state', () => {
+		render(<PasswordGenerator />)
+		const checkbox = screen.getByLabelText('Exclude Ambiguous Characters (0OIl1|)')
+		fireEvent.click(checkbox)
+		expect(checkbox).toBeChecked()
+	})
 })

@@ -52,10 +52,6 @@ export function useGeneratePassword() {
 
 	const generatePassword = () => {
 		const activePatterns = getActivePatterns()
-		if (activePatterns.length === 0) {
-			setPassword('')
-			return
-		}
 		const charactersByPattern = Math.floor(length / activePatterns.length)
 		let password = ''
 

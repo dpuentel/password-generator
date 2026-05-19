@@ -108,4 +108,34 @@ describe('PasswordResult', () => {
 		})
 		expect(screen.queryByLabelText('Copy failed')).not.toBeInTheDocument()
 	})
+
+	it('selects password text on click', () => {
+		const getSelectionSpy = vi.spyOn(window, 'getSelection').mockReturnValue({
+			selectAllChildren: vi.fn()
+		})
+		render(<PasswordResult password='mySecretPass' placeholder='P4$5W0rD!' />)
+		const textSpan = screen.getByText('mySecretPass')
+		fireEvent.click(textSpan)
+		expect(getSelectionSpy).toHaveBeenCalled()
+		getSelectionSpy.mockRestore()
+	})
+
+	it('does not select text on click when password is empty', () => {
+		const getSelectionSpy = vi.spyOn(window, 'getSelection')
+		render(<PasswordResult password='' placeholder='P4$5W0rD!' />)
+		const textSpan = screen.getByText('P4$5W0rD!')
+		fireEvent.click(textSpan)
+		expect(getSelectionSpy).not.toHaveBeenCalled()
+		getSelectionSpy.mockRestore()
+	})
+
+	it('has aria-label for click to select when password exists', () => {
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
+		expect(screen.getByText('test')).toHaveAttribute('aria-label', 'Click to select password')
+	})
+
+	it('does not have aria-label when password is empty', () => {
+		render(<PasswordResult password='' placeholder='P4$5W0rD!' />)
+		expect(screen.getByText('P4$5W0rD!')).not.toHaveAttribute('aria-label', 'Click to select password')
+	})
 })
