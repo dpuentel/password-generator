@@ -19,6 +19,8 @@ export default function PasswordGenerator() {
 		setIncludeNumbers,
 		includeSymbols,
 		setIncludeSymbols,
+		excludeAmbiguous,
+		setExcludeAmbiguous,
 		generatePassword
 	} = useGeneratePassword()
 
@@ -62,6 +64,11 @@ export default function PasswordGenerator() {
 					checked={includeSymbols}
 					onChange={(e) => setIncludeSymbols(e.target.checked)}
 					disabled={includeSymbols && isLastCharset}
+				/>
+				<CheckboxLabeled
+					label='Exclude Ambiguous Characters (0OIl1|)'
+					checked={excludeAmbiguous}
+					onChange={(e) => setExcludeAmbiguous(e.target.checked)}
 				/>
 				<PasswordStrength password={password} />
 				<Button onClick={generatePassword} text={'GENERATE 🡆'} ariaLabel='Generate password' />

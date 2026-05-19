@@ -3,7 +3,11 @@ import {
 	CharsetSymbols,
 	CharsetNumbers,
 	CharsetUppercase,
-	CharsetLowercase
+	CharsetLowercase,
+	CharsetSymbolsNoAmbiguous,
+	CharsetNumbersNoAmbiguous,
+	CharsetUppercaseNoAmbiguous,
+	CharsetLowercaseNoAmbiguous
 } from '../services/Patterns'
 
 const MIN_LENGTH = 4
@@ -16,10 +20,11 @@ export function useGeneratePassword() {
 	const [includeLowercase, setIncludeLowercase] = useState(true)
 	const [includeNumbers, setIncludeNumbers] = useState(false)
 	const [includeSymbols, setIncludeSymbols] = useState(false)
+	const [excludeAmbiguous, setExcludeAmbiguous] = useState(false)
 
 	useEffect(() => {
 		generatePassword()
-	}, [includeUppercase, includeLowercase, includeNumbers, includeSymbols, length])
+	}, [includeUppercase, includeLowercase, includeNumbers, includeSymbols, excludeAmbiguous, length])
 
 	const clampLength = (value) => {
 		const num = Number(value)
@@ -73,10 +78,17 @@ export function useGeneratePassword() {
 
 	const getActivePatterns = () => {
 		const charsets = []
-		if (includeLowercase) charsets.push(CharsetLowercase)
-		if (includeUppercase) charsets.push(CharsetUppercase)
-		if (includeNumbers) charsets.push(CharsetNumbers)
-		if (includeSymbols) charsets.push(CharsetSymbols)
+		if (excludeAmbiguous) {
+			if (includeLowercase) charsets.push(CharsetLowercaseNoAmbiguous)
+			if (includeUppercase) charsets.push(CharsetUppercaseNoAmbiguous)
+			if (includeNumbers) charsets.push(CharsetNumbersNoAmbiguous)
+			if (includeSymbols) charsets.push(CharsetSymbolsNoAmbiguous)
+		} else {
+			if (includeLowercase) charsets.push(CharsetLowercase)
+			if (includeUppercase) charsets.push(CharsetUppercase)
+			if (includeNumbers) charsets.push(CharsetNumbers)
+			if (includeSymbols) charsets.push(CharsetSymbols)
+		}
 		return charsets
 	}
 
@@ -101,11 +113,13 @@ export function useGeneratePassword() {
 		includeLowercase,
 		includeNumbers,
 		includeSymbols,
+		excludeAmbiguous,
 		setLength: setLengthClamped,
 		setIncludeUppercase: safeSetCharset(setIncludeUppercase, includeUppercase),
 		setIncludeLowercase: safeSetCharset(setIncludeLowercase, includeLowercase),
 		setIncludeNumbers: safeSetCharset(setIncludeNumbers, includeNumbers),
 		setIncludeSymbols: safeSetCharset(setIncludeSymbols, includeSymbols),
+		setExcludeAmbiguous,
 		generatePassword
 	}
 }

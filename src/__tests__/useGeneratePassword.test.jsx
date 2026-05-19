@@ -202,4 +202,59 @@ describe('useGeneratePassword', () => {
 		})
 		expect(result.current.includeSymbols).toBe(true)
 	})
+
+	it('excludeAmbiguous is false by default', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		expect(result.current.excludeAmbiguous).toBe(false)
+	})
+
+	it('setExcludeAmbiguous updates state', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setExcludeAmbiguous(true)
+		})
+		expect(result.current.excludeAmbiguous).toBe(true)
+	})
+
+	it('excludes ambiguous characters when enabled with lowercase', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setExcludeAmbiguous(true)
+			result.current.setLength(64)
+		})
+		expect(result.current.password).not.toMatch(/[ilo]/)
+	})
+
+	it('excludes ambiguous characters when enabled with uppercase', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeUppercase(true)
+			result.current.setExcludeAmbiguous(true)
+			result.current.setLength(64)
+		})
+		expect(result.current.password).not.toMatch(/[ILO]/)
+	})
+
+	it('excludes ambiguous digits when enabled with numbers', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeNumbers(true)
+			result.current.setExcludeAmbiguous(true)
+			result.current.setLength(64)
+		})
+		expect(result.current.password).not.toMatch(/[01]/)
+	})
+
+	it('includes ambiguous characters when disabled', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeUppercase(true)
+			result.current.setIncludeNumbers(true)
+			result.current.setExcludeAmbiguous(false)
+			result.current.setLength(64)
+		})
+		const password = result.current.password
+		const hasAmbiguous = /[ILO01]/.test(password)
+		expect(hasAmbiguous).toBe(true)
+	})
 })

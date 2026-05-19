@@ -3,7 +3,11 @@ import {
 	CharsetSymbols,
 	CharsetNumbers,
 	CharsetUppercase,
-	CharsetLowercase
+	CharsetLowercase,
+	CharsetSymbolsNoAmbiguous,
+	CharsetNumbersNoAmbiguous,
+	CharsetUppercaseNoAmbiguous,
+	CharsetLowercaseNoAmbiguous
 } from '../services/Patterns'
 
 describe('Patterns', () => {
@@ -38,6 +42,27 @@ describe('Patterns', () => {
 
 		it('CharsetNumbers contains only 0-9 characters', () => {
 			expect(CharsetNumbers).toMatch(/^[0-9]+$/)
+		})
+	})
+
+	describe('No Ambiguous Charset constants', () => {
+		it('CharsetLowercaseNoAmbiguous excludes i, l, o', () => {
+			expect(CharsetLowercaseNoAmbiguous).not.toMatch(/[ilo]/)
+			expect(CharsetLowercaseNoAmbiguous.length).toBe(23)
+		})
+
+		it('CharsetUppercaseNoAmbiguous excludes I, L, O', () => {
+			expect(CharsetUppercaseNoAmbiguous).not.toMatch(/[ILO]/)
+			expect(CharsetUppercaseNoAmbiguous.length).toBe(23)
+		})
+
+		it('CharsetNumbersNoAmbiguous excludes 0 and 1', () => {
+			expect(CharsetNumbersNoAmbiguous).not.toMatch(/[01]/)
+			expect(CharsetNumbersNoAmbiguous.length).toBe(8)
+		})
+
+		it('CharsetSymbolsNoAmbiguous matches regular CharsetSymbols', () => {
+			expect(CharsetSymbolsNoAmbiguous).toBe(CharsetSymbols)
 		})
 	})
 })
