@@ -145,6 +145,9 @@ const reducer = (state, action) => {
 	case 'SET_PASSWORD':
 		return { ...state, password: action.password, entropy: action.entropy }
 	case 'ADD_TO_HISTORY': {
+		if (state.history.some((entry) => entry.password === state.password)) {
+			return state
+		}
 		const entry = createHistoryEntry(state.password, state.mode)
 		const updatedHistory = addEntry(state.history, entry)
 		saveHistory(updatedHistory)

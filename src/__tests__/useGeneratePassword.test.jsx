@@ -539,6 +539,36 @@ describe('useGeneratePassword', () => {
 		expect(result.current.history[0].password).toBe(result.current.password)
 	})
 
+	it('does not add duplicate password to history', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		const firstPassword = result.current.password
+		expect(result.current.history.length).toBe(1)
+		act(() => {
+			result.current.saveCurrentToHistory()
+		})
+		expect(result.current.history.length).toBe(1)
+		expect(result.current.history[0].password).toBe(firstPassword)
+	})
+
+	it('adds different passwords to history', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		const firstPassword = result.current.password
+		act(() => {
+			result.current.setLength(20)
+		})
+		act(() => {
+			result.current.generatePassword()
+		})
+		expect(result.current.history.length).toBe(2)
+		expect(result.current.history[0].password).not.toBe(firstPassword)
+	})
+
 	it('limits history to 5 entries', () => {
 		const { result } = renderHook(() => useGeneratePassword())
 		for (let i = 0; i < 10; i++) {
