@@ -30,3 +30,11 @@ Object.defineProperty(global, 'navigator', {
 	},
 	writable: true
 })
+
+/* eslint-disable no-undef */
+HTMLDialogElement.prototype.showModal = vi.fn(function () {
+	this.open = true
+})
+HTMLDialogElement.prototype.close = vi.fn(function () {
+	this.open = false
+})
