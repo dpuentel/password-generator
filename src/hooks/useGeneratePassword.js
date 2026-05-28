@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useReducer, useEffect, useRef } from 'react'
 import {
 	CharsetSymbols,
 	CharsetNumbers,
@@ -9,113 +9,194 @@ import {
 	CharsetUppercaseNoAmbiguous,
 	CharsetLowercaseNoAmbiguous
 } from '../services/Patterns'
+import { getDictionary, getBrowserLanguage, DICTIONARY_SIZE } from '../services/dictionaries'
+import { PasswordEntropyCalculator, PassphraseEntropyCalculator } from '../services/PasswordEntropyCalculator'
+import { loadSettings, saveSettings } from '../services/localStorage'
 
 const MIN_LENGTH = 4
 const MAX_LENGTH = 64
+const PASSPHRASE_MAX_ENTROPY = 77
+const CHARACTERS_MAX_ENTROPY = 426
+
+const getDefaults = () => ({
+	mode: 'characters',
+	length: 10,
+	includeUppercase: false,
+	includeLowercase: true,
+	includeNumbers: false,
+	includeSymbols: false,
+	excludeAmbiguous: false,
+	wordCount: 4,
+	separator: '-',
+	language: getBrowserLanguage()
+})
+
+const clampLength = (value) => {
+	const num = Number(value)
+	if (isNaN(num)) return MIN_LENGTH
+	return Math.min(MAX_LENGTH, Math.max(MIN_LENGTH, num))
+}
+
+const getActiveCharsetCount = (state) => {
+	let count = 0
+	if (state.includeLowercase) count++
+	if (state.includeUppercase) count++
+	if (state.includeNumbers) count++
+	if (state.includeSymbols) count++
+	return count
+}
+
+const getActivePatterns = (state) => {
+	const charsets = []
+	if (state.excludeAmbiguous) {
+		if (state.includeLowercase) charsets.push(CharsetLowercaseNoAmbiguous)
+		if (state.includeUppercase) charsets.push(CharsetUppercaseNoAmbiguous)
+		if (state.includeNumbers) charsets.push(CharsetNumbersNoAmbiguous)
+		if (state.includeSymbols) charsets.push(CharsetSymbolsNoAmbiguous)
+	} else {
+		if (state.includeLowercase) charsets.push(CharsetLowercase)
+		if (state.includeUppercase) charsets.push(CharsetUppercase)
+		if (state.includeNumbers) charsets.push(CharsetNumbers)
+		if (state.includeSymbols) charsets.push(CharsetSymbols)
+	}
+	return charsets
+}
+
+const getRandomInt = (max) => {
+	const result = new Uint32Array(1)
+	window.crypto.getRandomValues(result)
+	return result[0] % max
+}
+
+const shuffle = (array) => {
+	for (let i = array.length - 1; i > 0; i--) {
+		const j = getRandomInt(i + 1)
+		;[array[i], array[j]] = [array[j], array[i]]
+	}
+	return array
+}
+
+const generateCharacterPassword = (state) => {
+	const activePatterns = getActivePatterns(state)
+	const charactersByPattern = Math.floor(state.length / activePatterns.length)
+	let pwd = ''
+
+	activePatterns.forEach((charset) => {
+		for (let i = 0; i < charactersByPattern; i++) {
+			pwd += charset[getRandomInt(charset.length)]
+		}
+	})
+
+	const remainingChars = state.length - pwd.length
+	const lastCharset = activePatterns[activePatterns.length - 1]
+	for (let i = 0; i < remainingChars; i++) {
+		pwd += lastCharset[getRandomInt(lastCharset.length)]
+	}
+
+	pwd = shuffle([...pwd]).join('')
+
+	return { password: pwd, entropy: PasswordEntropyCalculator(pwd) }
+}
+
+const generatePassphrase = (state) => {
+	const dictionary = getDictionary(state.language)
+	const words = []
+	for (let i = 0; i < state.wordCount; i++) {
+		words.push(dictionary[getRandomInt(dictionary.length)])
+	}
+	const pwd = words.join(state.separator)
+	return { password: pwd, entropy: PassphraseEntropyCalculator(state.wordCount, DICTIONARY_SIZE) }
+}
+
+const reducer = (state, action) => {
+	switch (action.type) {
+	case 'SET_MODE':
+		return { ...state, mode: action.value }
+	case 'SET_LENGTH':
+		return { ...state, length: clampLength(action.value) }
+	case 'SET_INCLUDE_UPPERCASE':
+		if (!action.value && getActiveCharsetCount(state) <= 1) return state
+		return { ...state, includeUppercase: action.value }
+	case 'SET_INCLUDE_LOWERCASE':
+		if (!action.value && getActiveCharsetCount(state) <= 1) return state
+		return { ...state, includeLowercase: action.value }
+	case 'SET_INCLUDE_NUMBERS':
+		if (!action.value && getActiveCharsetCount(state) <= 1) return state
+		return { ...state, includeNumbers: action.value }
+	case 'SET_INCLUDE_SYMBOLS':
+		if (!action.value && getActiveCharsetCount(state) <= 1) return state
+		return { ...state, includeSymbols: action.value }
+	case 'SET_EXCLUDE_AMBIGUOUS':
+		return { ...state, excludeAmbiguous: action.value }
+	case 'SET_WORD_COUNT':
+		return { ...state, wordCount: action.value }
+	case 'SET_SEPARATOR':
+		return { ...state, separator: action.value }
+	case 'SET_LANGUAGE':
+		return { ...state, language: action.value }
+	case 'GENERATE_PASSWORD':
+		return { ...state, password: action.password, entropy: action.entropy }
+	}
+}
 
 export function useGeneratePassword() {
-	const [password, setPassword] = useState('')
-	const [length, setLength] = useState(10)
-	const [includeUppercase, setIncludeUppercase] = useState(false)
-	const [includeLowercase, setIncludeLowercase] = useState(true)
-	const [includeNumbers, setIncludeNumbers] = useState(false)
-	const [includeSymbols, setIncludeSymbols] = useState(false)
-	const [excludeAmbiguous, setExcludeAmbiguous] = useState(false)
+	const defaults = getDefaults()
+	const saved = useRef(loadSettings())
+
+	const [state, dispatch] = useReducer(reducer, {
+		...defaults,
+		...saved.current,
+		password: '',
+		entropy: 0
+	})
 
 	useEffect(() => {
-		generatePassword()
-	}, [includeUppercase, includeLowercase, includeNumbers, includeSymbols, excludeAmbiguous, length])
-
-	const clampLength = (value) => {
-		const num = Number(value)
-		if (isNaN(num)) return MIN_LENGTH
-		return Math.min(MAX_LENGTH, Math.max(MIN_LENGTH, num))
-	}
-
-	const setLengthClamped = (value) => {
-		setLength(clampLength(value))
-	}
-
-	const getActiveCharsetCount = () => {
-		let count = 0
-		if (includeLowercase) count++
-		if (includeUppercase) count++
-		if (includeNumbers) count++
-		if (includeSymbols) count++
-		return count
-	}
-
-	const safeSetCharset = (setter, currentValue) => (newValue) => {
-		if (!newValue && getActiveCharsetCount() <= 1) return
-		setter(newValue)
-	}
-
-	const generatePassword = () => {
-		const activePatterns = getActivePatterns()
-		const charactersByPattern = Math.floor(length / activePatterns.length)
-		let password = ''
-
-		activePatterns.forEach((charset) => {
-			for (let i = 0; i < charactersByPattern; i++) {
-				password += charset[getRandomInt(charset.length)]
-			}
+		const { mode, length, includeUppercase, includeLowercase, includeNumbers,
+			includeSymbols, excludeAmbiguous, wordCount, separator, language } = state
+		saveSettings({
+			mode, length, includeUppercase, includeLowercase, includeNumbers,
+			includeSymbols, excludeAmbiguous, wordCount, separator, language
 		})
+	}, [state])
 
-		const remainingChars = length - password.length
-		const lastCharset = activePatterns[activePatterns.length - 1]
-		for (let i = 0; i < remainingChars; i++) {
-			password += lastCharset[getRandomInt(lastCharset.length)]
-		}
+	useEffect(() => {
+		const result = state.mode === 'passphrase'
+			? generatePassphrase(state)
+			: generateCharacterPassword(state)
+		dispatch({ type: 'GENERATE_PASSWORD', ...result })
+	}, [state.mode, state.length, state.includeUppercase, state.includeLowercase, state.includeNumbers, state.includeSymbols, state.excludeAmbiguous, state.wordCount, state.separator, state.language])
 
-		password = shuffle([...password]).join('')
-
-		setPassword(password)
-	}
-
-	const getActivePatterns = () => {
-		const charsets = []
-		if (excludeAmbiguous) {
-			if (includeLowercase) charsets.push(CharsetLowercaseNoAmbiguous)
-			if (includeUppercase) charsets.push(CharsetUppercaseNoAmbiguous)
-			if (includeNumbers) charsets.push(CharsetNumbersNoAmbiguous)
-			if (includeSymbols) charsets.push(CharsetSymbolsNoAmbiguous)
-		} else {
-			if (includeLowercase) charsets.push(CharsetLowercase)
-			if (includeUppercase) charsets.push(CharsetUppercase)
-			if (includeNumbers) charsets.push(CharsetNumbers)
-			if (includeSymbols) charsets.push(CharsetSymbols)
-		}
-		return charsets
-	}
-
-	const shuffle = (array) => {
-		for (let i = array.length - 1; i > 0; i--) {
-			const j = getRandomInt(i + 1)
-			;[array[i], array[j]] = [array[j], array[i]]
-		}
-		return array
-	}
-
-	const getRandomInt = (max) => {
-		const result = new Uint32Array(1)
-		window.crypto.getRandomValues(result)
-		return result[0] % max
-	}
+	const maxEntropy = state.mode === 'passphrase' ? PASSPHRASE_MAX_ENTROPY : CHARACTERS_MAX_ENTROPY
 
 	return {
-		password,
-		length,
-		includeUppercase,
-		includeLowercase,
-		includeNumbers,
-		includeSymbols,
-		excludeAmbiguous,
-		setLength: setLengthClamped,
-		setIncludeUppercase: safeSetCharset(setIncludeUppercase, includeUppercase),
-		setIncludeLowercase: safeSetCharset(setIncludeLowercase, includeLowercase),
-		setIncludeNumbers: safeSetCharset(setIncludeNumbers, includeNumbers),
-		setIncludeSymbols: safeSetCharset(setIncludeSymbols, includeSymbols),
-		setExcludeAmbiguous,
-		generatePassword
+		password: state.password,
+		mode: state.mode,
+		setMode: (value) => dispatch({ type: 'SET_MODE', value }),
+		length: state.length,
+		includeUppercase: state.includeUppercase,
+		includeLowercase: state.includeLowercase,
+		includeNumbers: state.includeNumbers,
+		includeSymbols: state.includeSymbols,
+		excludeAmbiguous: state.excludeAmbiguous,
+		wordCount: state.wordCount,
+		separator: state.separator,
+		language: state.language,
+		entropy: state.entropy,
+		maxEntropy,
+		setLength: (value) => dispatch({ type: 'SET_LENGTH', value }),
+		setIncludeUppercase: (value) => dispatch({ type: 'SET_INCLUDE_UPPERCASE', value }),
+		setIncludeLowercase: (value) => dispatch({ type: 'SET_INCLUDE_LOWERCASE', value }),
+		setIncludeNumbers: (value) => dispatch({ type: 'SET_INCLUDE_NUMBERS', value }),
+		setIncludeSymbols: (value) => dispatch({ type: 'SET_INCLUDE_SYMBOLS', value }),
+		setExcludeAmbiguous: (value) => dispatch({ type: 'SET_EXCLUDE_AMBIGUOUS', value }),
+		setWordCount: (value) => dispatch({ type: 'SET_WORD_COUNT', value }),
+		setSeparator: (value) => dispatch({ type: 'SET_SEPARATOR', value }),
+		setLanguage: (value) => dispatch({ type: 'SET_LANGUAGE', value }),
+		generatePassword: () => {
+			const result = state.mode === 'passphrase'
+				? generatePassphrase(state)
+				: generateCharacterPassword(state)
+			dispatch({ type: 'GENERATE_PASSWORD', ...result })
+		}
 	}
 }

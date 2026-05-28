@@ -1,12 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useGeneratePassword } from '../hooks/useGeneratePassword'
-import {
-	CharsetLowercase,
-	CharsetUppercase,
-	CharsetNumbers,
-	CharsetSymbols
-} from '../services/Patterns'
 
 describe('useGeneratePassword', () => {
 	beforeEach(() => {
@@ -338,5 +332,200 @@ describe('useGeneratePassword', () => {
 		const password = result.current.password
 		expect(password).not.toMatch(/[a-z]/)
 		expect(password).not.toMatch(/[ILO01]/)
+	})
+
+	it('defaults to characters mode', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		expect(result.current.mode).toBe('characters')
+	})
+
+	it('switches to passphrase mode', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setMode('passphrase')
+		})
+		expect(result.current.mode).toBe('passphrase')
+	})
+
+	it('generates passphrase with correct word count', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setMode('passphrase')
+		})
+		const words = result.current.password.split('-')
+		expect(words.length).toBe(4)
+	})
+
+	it('generates passphrase with custom word count', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setMode('passphrase')
+			result.current.setWordCount(6)
+		})
+		const words = result.current.password.split('-')
+		expect(words.length).toBe(6)
+	})
+
+	it('generates passphrase with custom separator', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setMode('passphrase')
+			result.current.setSeparator('.')
+		})
+		expect(result.current.password).toContain('.')
+	})
+
+	it('generates passphrase with space separator', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setMode('passphrase')
+			result.current.setSeparator(' ')
+		})
+		const words = result.current.password.split(' ')
+		expect(words.length).toBe(4)
+	})
+
+	it('generates passphrase with Spanish dictionary', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setMode('passphrase')
+			result.current.setLanguage('es')
+		})
+		expect(result.current.password).not.toBe('')
+	})
+
+	it('generates passphrase with Galician dictionary', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setMode('passphrase')
+			result.current.setLanguage('gl')
+		})
+		expect(result.current.password).not.toBe('')
+	})
+
+	it('calculates entropy for passphrase mode', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setMode('passphrase')
+		})
+		expect(result.current.entropy).toBeCloseTo(44)
+		expect(result.current.maxEntropy).toBe(77)
+	})
+
+	it('calculates entropy for character mode', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		expect(result.current.entropy).toBeGreaterThan(0)
+		expect(result.current.maxEntropy).toBe(426)
+	})
+
+	it('regenerates passphrase when word count changes', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setMode('passphrase')
+		})
+		act(() => {
+			result.current.setWordCount(5)
+		})
+		const words = result.current.password.split('-')
+		expect(words.length).toBe(5)
+	})
+
+	it('regenerates passphrase when separator changes', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setMode('passphrase')
+		})
+		act(() => {
+			result.current.setSeparator('_')
+		})
+		expect(result.current.password).toContain('_')
+	})
+
+	it('regenerates passphrase when language changes', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setMode('passphrase')
+		})
+		act(() => {
+			result.current.setLanguage('es')
+		})
+		expect(result.current.password).not.toBe('')
+	})
+
+	it('saves settings to localStorage', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setMode('passphrase')
+			result.current.setWordCount(5)
+			result.current.setSeparator('.')
+		})
+		const saved = JSON.parse(localStorage.getItem('password-generator-settings'))
+		expect(saved.mode).toBe('passphrase')
+		expect(saved.wordCount).toBe(5)
+		expect(saved.separator).toBe('.')
+	})
+
+	it('loads settings from localStorage', () => {
+		localStorage.setItem('password-generator-settings', JSON.stringify({
+			mode: 'passphrase',
+			wordCount: 6,
+			separator: '_',
+			language: 'es',
+			length: 10,
+			includeUppercase: false,
+			includeLowercase: true,
+			includeNumbers: false,
+			includeSymbols: false,
+			excludeAmbiguous: false
+		}))
+		const { result } = renderHook(() => useGeneratePassword())
+		expect(result.current.mode).toBe('passphrase')
+		expect(result.current.wordCount).toBe(6)
+		expect(result.current.separator).toBe('_')
+		expect(result.current.language).toBe('es')
+	})
+
+	it('ignores unknown action types', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		expect(result.current.password).not.toBe('')
+	})
+
+	it('cannot disable uppercase when it is the only active charset', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeUppercase(true)
+			result.current.setIncludeLowercase(false)
+		})
+		act(() => {
+			result.current.setIncludeUppercase(false)
+		})
+		expect(result.current.includeUppercase).toBe(true)
+	})
+
+	it('cannot disable numbers when it is the only active charset', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeNumbers(true)
+			result.current.setIncludeLowercase(false)
+		})
+		act(() => {
+			result.current.setIncludeNumbers(false)
+		})
+		expect(result.current.includeNumbers).toBe(true)
+	})
+
+	it('cannot disable symbols when it is the only active charset', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeSymbols(true)
+			result.current.setIncludeLowercase(false)
+		})
+		act(() => {
+			result.current.setIncludeSymbols(false)
+		})
+		expect(result.current.includeSymbols).toBe(true)
 	})
 })

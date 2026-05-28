@@ -1,3 +1,7 @@
+export const PassphraseEntropyCalculator = (wordCount, dictionarySize) => {
+	return wordCount * Math.log2(dictionarySize)
+}
+
 export const PasswordEntropyCalculator = (password) => {
 	const length = password.length
 	const hasLowercase = /[a-z]/.test(password)
