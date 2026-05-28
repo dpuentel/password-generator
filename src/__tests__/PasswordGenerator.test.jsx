@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import PasswordGenerator from '../components/PasswordGenerator'
 
 describe('PasswordGenerator', () => {
@@ -93,5 +93,42 @@ describe('PasswordGenerator', () => {
 		const checkbox = screen.getByLabelText('Exclude Ambiguous Characters (0OIl1|)')
 		fireEvent.click(checkbox)
 		expect(checkbox).toBeChecked()
+	})
+
+	it('renders mode selector buttons', () => {
+		render(<PasswordGenerator />)
+		expect(screen.getByText('Random (Characters)')).toBeInTheDocument()
+		expect(screen.getByText('Easy to Remember (Words)')).toBeInTheDocument()
+	})
+
+	it('shows character options by default', () => {
+		render(<PasswordGenerator />)
+		expect(screen.getByText('Character Length')).toBeInTheDocument()
+		expect(screen.getByText('Include Lowercase Letters')).toBeInTheDocument()
+	})
+
+	it('switches to passphrase mode and shows passphrase options', () => {
+		render(<PasswordGenerator />)
+		fireEvent.click(screen.getByText('Easy to Remember (Words)'))
+		expect(screen.getByText('Word Count')).toBeInTheDocument()
+		expect(screen.getByText('Separator')).toBeInTheDocument()
+		expect(screen.getByLabelText('Dictionary language')).toBeInTheDocument()
+		expect(screen.queryByText('Character Length')).not.toBeInTheDocument()
+	})
+
+	it('switches back to characters mode from passphrase mode', () => {
+		render(<PasswordGenerator />)
+		fireEvent.click(screen.getByText('Easy to Remember (Words)'))
+		fireEvent.click(screen.getByText('Random (Characters)'))
+		expect(screen.getByText('Character Length')).toBeInTheDocument()
+		expect(screen.queryByText('Word Count')).not.toBeInTheDocument()
+	})
+
+	it('generates passphrase when in passphrase mode', () => {
+		render(<PasswordGenerator />)
+		fireEvent.click(screen.getByText('Easy to Remember (Words)'))
+		const generateButton = screen.getByRole('button', { name: 'Generate password' })
+		fireEvent.click(generateButton)
+		expect(screen.getByLabelText('Generated password').textContent).not.toBe('')
 	})
 })

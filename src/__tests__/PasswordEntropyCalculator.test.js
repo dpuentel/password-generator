@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { PasswordEntropyCalculator } from '../services/PasswordEntropyCalculator'
+import { PasswordEntropyCalculator, PassphraseEntropyCalculator } from '../services/PasswordEntropyCalculator'
 
 describe('PasswordEntropyCalculator', () => {
 	it('returns 0 for empty string', () => {
@@ -70,5 +70,28 @@ describe('PasswordEntropyCalculator', () => {
 		const result = PasswordEntropyCalculator('a\ud83d\ude00')
 		const expected = Math.log2(26 * 3662) * 3
 		expect(result).toBeCloseTo(expected)
+	})
+})
+
+describe('PassphraseEntropyCalculator', () => {
+	it('calculates entropy for 3 words from 2048 word dictionary', () => {
+		const result = PassphraseEntropyCalculator(3, 2048)
+		expect(result).toBeCloseTo(33)
+	})
+
+	it('calculates entropy for 4 words from 2048 word dictionary', () => {
+		const result = PassphraseEntropyCalculator(4, 2048)
+		expect(result).toBeCloseTo(44)
+	})
+
+	it('calculates entropy for 6 words from 2048 word dictionary', () => {
+		const result = PassphraseEntropyCalculator(6, 2048)
+		expect(result).toBeCloseTo(66)
+	})
+
+	it('scales linearly with word count', () => {
+		const result3 = PassphraseEntropyCalculator(3, 2048)
+		const result6 = PassphraseEntropyCalculator(6, 2048)
+		expect(result6).toBeCloseTo(result3 * 2)
 	})
 })
