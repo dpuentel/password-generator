@@ -12,6 +12,7 @@ import {
 import { getDictionary, getBrowserLanguage, DICTIONARY_SIZE } from '../services/dictionaries'
 import { PasswordEntropyCalculator, PassphraseEntropyCalculator } from '../services/PasswordEntropyCalculator'
 import { loadSettings, saveSettings } from '../services/localStorage'
+import { loadHistory, saveHistory, addEntry, clearHistory as clearHistoryStorage, loadCollapsed, saveCollapsed } from '../services/sessionStorage'
 
 const MIN_LENGTH = 4
 const MAX_LENGTH = 64
@@ -134,8 +135,23 @@ const reducer = (state, action) => {
 		return { ...state, separator: action.value }
 	case 'SET_LANGUAGE':
 		return { ...state, language: action.value }
-	case 'GENERATE_PASSWORD':
-		return { ...state, password: action.password, entropy: action.entropy }
+	case 'GENERATE_PASSWORD': {
+		const entry = {
+			id: Date.now().toString(),
+			password: action.password,
+			mode: state.mode,
+			timestamp: Date.now()
+		}
+		const updatedHistory = addEntry(state.history, entry)
+		saveHistory(updatedHistory)
+		return { ...state, password: action.password, entropy: action.entropy, history: updatedHistory }
+	}
+	case 'CLEAR_HISTORY':
+		clearHistoryStorage()
+		return { ...state, history: [] }
+	case 'SET_HISTORY_COLLAPSED':
+		saveCollapsed(action.value)
+		return { ...state, historyCollapsed: action.value }
 	}
 }
 
@@ -147,7 +163,9 @@ export function useGeneratePassword() {
 		...defaults,
 		...saved.current,
 		password: '',
-		entropy: 0
+		entropy: 0,
+		history: loadHistory(),
+		historyCollapsed: loadCollapsed()
 	})
 
 	useEffect(() => {
@@ -183,6 +201,8 @@ export function useGeneratePassword() {
 		language: state.language,
 		entropy: state.entropy,
 		maxEntropy,
+		history: state.history,
+		historyCollapsed: state.historyCollapsed,
 		setLength: (value) => dispatch({ type: 'SET_LENGTH', value }),
 		setIncludeUppercase: (value) => dispatch({ type: 'SET_INCLUDE_UPPERCASE', value }),
 		setIncludeLowercase: (value) => dispatch({ type: 'SET_INCLUDE_LOWERCASE', value }),
@@ -197,6 +217,8 @@ export function useGeneratePassword() {
 				? generatePassphrase(state)
 				: generateCharacterPassword(state)
 			dispatch({ type: 'GENERATE_PASSWORD', ...result })
-		}
+		},
+		clearHistory: () => dispatch({ type: 'CLEAR_HISTORY' }),
+		setHistoryCollapsed: (value) => dispatch({ type: 'SET_HISTORY_COLLAPSED', value })
 	}
 }
