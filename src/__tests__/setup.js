@@ -1,6 +1,10 @@
 import '@testing-library/jest-dom'
-import { afterEach } from 'vitest'
+import { beforeEach, afterEach } from 'vitest'
 import { cleanup } from '@testing-library/react'
+
+beforeEach(() => {
+	localStorage.clear()
+})
 
 afterEach(() => {
 	cleanup()
@@ -21,7 +25,8 @@ Object.defineProperty(global, 'navigator', {
 	value: {
 		clipboard: {
 			writeText: vi.fn(() => Promise.resolve())
-		}
+		},
+		language: 'en'
 	},
 	writable: true
 })
