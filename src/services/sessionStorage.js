@@ -45,7 +45,18 @@ export const saveHistory = (entries) => {
 }
 
 export const addEntry = (entries, entry) => {
-	return [entry, ...entries].slice(0, MAX_ENTRIES)
+	const updated = [entry, ...entries]
+	if (entry.name) return updated
+
+	const result = []
+	let unnamedCount = 0
+	for (const e of updated) {
+		if (e.name || unnamedCount < MAX_ENTRIES) {
+			result.push(e)
+			if (!e.name) unnamedCount++
+		}
+	}
+	return result
 }
 
 export const clearHistory = () => {
