@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
 	CharsetSymbols,
 	CharsetNumbers,
@@ -9,22 +9,55 @@ import {
 	CharsetUppercaseNoAmbiguous,
 	CharsetLowercaseNoAmbiguous
 } from '../services/Patterns'
+import { getDictionary, getBrowserLanguage, DICTIONARY_SIZE } from '../services/dictionaries'
+import { PasswordEntropyCalculator, PassphraseEntropyCalculator } from '../services/PasswordEntropyCalculator'
+import { loadSettings, saveSettings } from '../services/localStorage'
 
 const MIN_LENGTH = 4
 const MAX_LENGTH = 64
+const PASSPHRASE_MAX_ENTROPY = 77
+const CHARACTERS_MAX_ENTROPY = 426
+
+const getDefaults = () => ({
+	mode: 'characters',
+	length: 10,
+	includeUppercase: false,
+	includeLowercase: true,
+	includeNumbers: false,
+	includeSymbols: false,
+	excludeAmbiguous: false,
+	wordCount: 4,
+	separator: '-',
+	language: getBrowserLanguage()
+})
 
 export function useGeneratePassword() {
+	const defaults = getDefaults()
+	const saved = useRef(loadSettings())
+
+	const [mode, setMode] = useState(saved.current?.mode ?? defaults.mode)
+	const [length, setLength] = useState(saved.current?.length ?? defaults.length)
+	const [includeUppercase, setIncludeUppercase] = useState(saved.current?.includeUppercase ?? defaults.includeUppercase)
+	const [includeLowercase, setIncludeLowercase] = useState(saved.current?.includeLowercase ?? defaults.includeLowercase)
+	const [includeNumbers, setIncludeNumbers] = useState(saved.current?.includeNumbers ?? defaults.includeNumbers)
+	const [includeSymbols, setIncludeSymbols] = useState(saved.current?.includeSymbols ?? defaults.includeSymbols)
+	const [excludeAmbiguous, setExcludeAmbiguous] = useState(saved.current?.excludeAmbiguous ?? defaults.excludeAmbiguous)
+	const [wordCount, setWordCount] = useState(saved.current?.wordCount ?? defaults.wordCount)
+	const [separator, setSeparator] = useState(saved.current?.separator ?? defaults.separator)
+	const [language, setLanguage] = useState(saved.current?.language ?? defaults.language)
 	const [password, setPassword] = useState('')
-	const [length, setLength] = useState(10)
-	const [includeUppercase, setIncludeUppercase] = useState(false)
-	const [includeLowercase, setIncludeLowercase] = useState(true)
-	const [includeNumbers, setIncludeNumbers] = useState(false)
-	const [includeSymbols, setIncludeSymbols] = useState(false)
-	const [excludeAmbiguous, setExcludeAmbiguous] = useState(false)
+	const [entropy, setEntropy] = useState(0)
+
+	useEffect(() => {
+		saveSettings({
+			mode, length, includeUppercase, includeLowercase, includeNumbers,
+			includeSymbols, excludeAmbiguous, wordCount, separator, language
+		})
+	}, [mode, length, includeUppercase, includeLowercase, includeNumbers, includeSymbols, excludeAmbiguous, wordCount, separator, language])
 
 	useEffect(() => {
 		generatePassword()
-	}, [includeUppercase, includeLowercase, includeNumbers, includeSymbols, excludeAmbiguous, length])
+	}, [mode, length, includeUppercase, includeLowercase, includeNumbers, includeSymbols, excludeAmbiguous, wordCount, separator, language])
 
 	const clampLength = (value) => {
 		const num = Number(value)
@@ -51,25 +84,45 @@ export function useGeneratePassword() {
 	}
 
 	const generatePassword = () => {
+		if (mode === 'passphrase') {
+			generatePassphrase()
+		} else {
+			generateCharacterPassword()
+		}
+	}
+
+	const generateCharacterPassword = () => {
 		const activePatterns = getActivePatterns()
 		const charactersByPattern = Math.floor(length / activePatterns.length)
-		let password = ''
+		let pwd = ''
 
 		activePatterns.forEach((charset) => {
 			for (let i = 0; i < charactersByPattern; i++) {
-				password += charset[getRandomInt(charset.length)]
+				pwd += charset[getRandomInt(charset.length)]
 			}
 		})
 
-		const remainingChars = length - password.length
+		const remainingChars = length - pwd.length
 		const lastCharset = activePatterns[activePatterns.length - 1]
 		for (let i = 0; i < remainingChars; i++) {
-			password += lastCharset[getRandomInt(lastCharset.length)]
+			pwd += lastCharset[getRandomInt(lastCharset.length)]
 		}
 
-		password = shuffle([...password]).join('')
+		pwd = shuffle([...pwd]).join('')
 
-		setPassword(password)
+		setPassword(pwd)
+		setEntropy(PasswordEntropyCalculator(pwd))
+	}
+
+	const generatePassphrase = () => {
+		const dictionary = getDictionary(language)
+		const words = []
+		for (let i = 0; i < wordCount; i++) {
+			words.push(dictionary[getRandomInt(dictionary.length)])
+		}
+		const pwd = words.join(separator)
+		setPassword(pwd)
+		setEntropy(PassphraseEntropyCalculator(wordCount, DICTIONARY_SIZE))
 	}
 
 	const getActivePatterns = () => {
@@ -102,20 +155,32 @@ export function useGeneratePassword() {
 		return result[0] % max
 	}
 
+	const maxEntropy = mode === 'passphrase' ? PASSPHRASE_MAX_ENTROPY : CHARACTERS_MAX_ENTROPY
+
 	return {
 		password,
+		mode,
+		setMode,
 		length,
 		includeUppercase,
 		includeLowercase,
 		includeNumbers,
 		includeSymbols,
 		excludeAmbiguous,
+		wordCount,
+		separator,
+		language,
+		entropy,
+		maxEntropy,
 		setLength: setLengthClamped,
 		setIncludeUppercase: safeSetCharset(setIncludeUppercase, includeUppercase),
 		setIncludeLowercase: safeSetCharset(setIncludeLowercase, includeLowercase),
 		setIncludeNumbers: safeSetCharset(setIncludeNumbers, includeNumbers),
 		setIncludeSymbols: safeSetCharset(setIncludeSymbols, includeSymbols),
 		setExcludeAmbiguous,
+		setWordCount,
+		setSeparator,
+		setLanguage,
 		generatePassword
 	}
 }
