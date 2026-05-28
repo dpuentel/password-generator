@@ -6,6 +6,7 @@ import Button from './Button'
 import PasswordStrength from './PasswordStrength'
 import ModeSelector from './ModeSelector'
 import PassphraseOptions from './PassphraseOptions'
+import PasswordHistory from './PasswordHistory'
 import { useGeneratePassword } from '../hooks/useGeneratePassword'
 
 export default function PasswordGenerator() {
@@ -33,6 +34,10 @@ export default function PasswordGenerator() {
 		setLanguage,
 		entropy,
 		maxEntropy,
+		history,
+		historyCollapsed,
+		setHistoryCollapsed,
+		clearHistory,
 		generatePassword
 	} = useGeneratePassword()
 
@@ -100,6 +105,14 @@ export default function PasswordGenerator() {
 				)}
 				<PasswordStrength entropy={entropy} maxEntropy={maxEntropy} />
 				<Button onClick={generatePassword} text={'GENERATE 🡆'} ariaLabel='Generate password' />
+			</article>
+			<article className='w-80'>
+				<PasswordHistory
+					history={history}
+					historyCollapsed={historyCollapsed}
+					setHistoryCollapsed={setHistoryCollapsed}
+					clearHistory={clearHistory}
+				/>
 			</article>
 		</section>
 	)
