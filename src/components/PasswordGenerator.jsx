@@ -44,7 +44,7 @@ export default function PasswordGenerator() {
 	const activeCount = [includeLowercase, includeUppercase, includeNumbers, includeSymbols].filter(Boolean).length
 	const isLastCharset = activeCount <= 1
 
-	const placeholder = mode === 'passphrase' ? `word${separator}word${separator}word` : 'P4$5W0rD!'
+	const placeholder = 'P4$5W0rD!'
 
 	return (
 		<section className='grid grid-cols-1 gap-4 place-items-center'>
