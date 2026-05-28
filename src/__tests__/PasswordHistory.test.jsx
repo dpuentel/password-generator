@@ -34,24 +34,31 @@ describe('PasswordHistory', () => {
 	})
 
 	it('starts collapsed by default', () => {
-		render(<PasswordHistory {...defaultProps} />)
-		expect(screen.getByText('▶')).toBeInTheDocument()
-		expect(screen.queryByText('No history yet')).not.toBeInTheDocument()
+		const { container } = render(<PasswordHistory {...defaultProps} />)
+		expect(screen.getByLabelText('Toggle history')).toHaveAttribute('aria-expanded', 'false')
+		const gridDiv = container.querySelector('.grid.transition-\\[grid-template-rows\\]')
+		expect(gridDiv.style.gridTemplateRows).toBe('0fr')
 	})
 
 	it('shows content when expanded', () => {
 		render(<PasswordHistory {...defaultProps} historyCollapsed={false} />)
-		expect(screen.getByText('▼')).toBeInTheDocument()
-	})
-
-	it('shows empty state when no history', () => {
-		render(<PasswordHistory {...defaultProps} historyCollapsed={false} />)
-		expect(screen.getByText('No history yet')).toBeInTheDocument()
+		expect(screen.getByLabelText('Toggle history')).toHaveAttribute('aria-expanded', 'true')
+		expect(screen.getByText('No history yet')).toBeVisible()
 	})
 
 	it('shows privacy notice', () => {
 		render(<PasswordHistory {...defaultProps} historyCollapsed={false} />)
-		expect(screen.getByText(/All data stays in your browser/)).toBeInTheDocument()
+		expect(screen.getByText('All data stays in your browser')).toBeInTheDocument()
+	})
+
+	it('renders lock icon in privacy notice', () => {
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} />)
+		expect(screen.getByTitle('Lock')).toBeInTheDocument()
+	})
+
+	it('renders chevron icon', () => {
+		render(<PasswordHistory {...defaultProps} />)
+		expect(screen.getByTitle('Chevron')).toBeInTheDocument()
 	})
 
 	it('calls setHistoryCollapsed when clicking header', () => {
@@ -76,7 +83,7 @@ describe('PasswordHistory', () => {
 
 	it('shows relative time for each entry', () => {
 		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
-		expect(screen.getByText('Just now')).toBeInTheDocument()
+		expect(screen.getAllByText('Just now').length).toBeGreaterThan(0)
 		expect(screen.getByText('5 min ago')).toBeInTheDocument()
 		expect(screen.getByText('2 hours ago')).toBeInTheDocument()
 	})
