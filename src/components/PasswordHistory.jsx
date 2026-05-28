@@ -1,10 +1,36 @@
-import { useState } from 'react'
-import { CheckIcon, CopyIcon, ChevronIcon, LockIcon } from './Icons'
+import { useState, useRef, useEffect } from 'react'
+import { CheckIcon, CopyIcon, ChevronIcon, LockIcon, TrashIcon, PencilIcon } from './Icons'
 import RelativeTime from './RelativeTime'
 
-export default function PasswordHistory({ history, historyCollapsed, setHistoryCollapsed, clearHistory }) {
+export default function PasswordHistory({ history, historyCollapsed, setHistoryCollapsed, clearHistory, clearUnnamedHistory, deleteEntry, renameEntry }) {
 	const [revealedIds, setRevealedIds] = useState(new Set())
 	const [copiedId, setCopiedId] = useState(null)
+	const [editingId, setEditingId] = useState(null)
+	const [editValue, setEditValue] = useState('')
+	const [deleteConfirmId, setDeleteConfirmId] = useState(null)
+	const [showClearDialog, setShowClearDialog] = useState(false)
+	const editRef = useRef(null)
+	const clearDialogRef = useRef(null)
+	const deleteDialogRef = useRef(null)
+
+	useEffect(() => {
+		if (editingId && editRef.current) {
+			editRef.current.focus()
+			editRef.current.select()
+		}
+	}, [editingId])
+
+	useEffect(() => {
+		if (showClearDialog && clearDialogRef.current) {
+			clearDialogRef.current.showModal()
+		}
+	}, [showClearDialog])
+
+	useEffect(() => {
+		if (deleteConfirmId && deleteDialogRef.current) {
+			deleteDialogRef.current.showModal()
+		}
+	}, [deleteConfirmId])
 
 	const toggleReveal = (id) => {
 		setRevealedIds((prev) => {
@@ -30,6 +56,55 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 		}
 	}
 
+	const startEditing = (id, currentName) => {
+		setEditingId(id)
+		setEditValue(currentName || '')
+	}
+
+	const saveEdit = (id) => {
+		renameEntry(id, editValue)
+		setEditingId(null)
+		setEditValue('')
+	}
+
+	const cancelEdit = () => {
+		setEditingId(null)
+		setEditValue('')
+	}
+
+	const handleDelete = (id, name) => {
+		if (name) {
+			setDeleteConfirmId(id)
+		} else {
+			deleteEntry(id)
+		}
+	}
+
+	const confirmDelete = () => {
+		if (deleteConfirmId) {
+			deleteEntry(deleteConfirmId)
+			setDeleteConfirmId(null)
+		}
+	}
+
+	const handleClear = () => {
+		const namedCount = history.filter((e) => e.name).length
+		if (namedCount > 0) {
+			setShowClearDialog(true)
+		} else {
+			clearHistory()
+		}
+	}
+
+	const sortedHistory = [...history].sort((a, b) => {
+		if (!a.name && b.name) return -1
+		if (a.name && !b.name) return 1
+		if (a.name && b.name) return a.name.localeCompare(b.name)
+		return b.timestamp - a.timestamp
+	})
+
+	const namedCount = history.filter((e) => e.name).length
+
 	return (
 		<div className='bg-slate-800 w-full text-xs'>
 			<button
@@ -52,30 +127,77 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 						{history.length === 0 ? (
 							<p className='p-3 text-gray-500 text-center'>No history yet</p>
 						) : (
-							<ul className='divide-y divide-slate-700'>
-								{history.map((entry) => (
-									<li key={entry.id} className='flex items-center gap-2 p-3'>
-										<button
-											onClick={() => toggleReveal(entry.id)}
-											className='text-gray-300 font-mono text-sm truncate min-w-0 grow text-left hover:text-gray-100 transition-colors duration-150'
-											aria-label={revealedIds.has(entry.id) ? 'Hide password' : 'Reveal password'}
-										>
-											{revealedIds.has(entry.id) ? entry.password : '••••••••••'}
-										</button>
-										<span className='text-gray-500 shrink-0'>
-											<RelativeTime timestamp={entry.timestamp} />
-										</span>
-										<button
-											onClick={() => handleCopy(entry.id, entry.password)}
-											className='w-5 shrink-0 hover:text-gray-300 text-gray-500 transition-colors duration-150'
-											aria-label='Copy password'
-										>
-											{copiedId === entry.id ? (
-												<CheckIcon />
+							<ul className='divide-y divide-slate-700 max-h-60 overflow-y-auto'>
+								{sortedHistory.map((entry) => (
+									<li key={entry.id} className='flex flex-col gap-1 p-3'>
+										<div className='flex items-center gap-2'>
+											{editingId === entry.id ? (
+												<input
+													ref={editRef}
+													type='text'
+													value={editValue}
+													onChange={(e) => setEditValue(e.target.value.slice(0, 30))}
+													onKeyDown={(e) => {
+														if (e.key === 'Enter') saveEdit(entry.id)
+														if (e.key === 'Escape') cancelEdit()
+													}}
+													onBlur={() => saveEdit(entry.id)}
+													placeholder='Name this password'
+													maxLength={30}
+													className='bg-slate-900 text-gray-300 px-2 py-1 rounded text-xs min-w-0 grow'
+													aria-label='Password name'
+												/>
 											) : (
-												<CopyIcon />
+												<button
+													onClick={() => entry.name ? toggleReveal(entry.id) : toggleReveal(entry.id)}
+													className='text-gray-300 font-mono text-sm truncate min-w-0 grow text-left hover:text-gray-100 transition-colors duration-150'
+													aria-label={revealedIds.has(entry.id) ? 'Hide password' : 'Reveal password'}
+												>
+													{entry.name ? (
+														<span className='font-bold text-gray-200'>{entry.name}</span>
+													) : (
+														revealedIds.has(entry.id) ? entry.password : '••••••••••'
+													)}
+												</button>
 											)}
-										</button>
+											<span className='text-gray-500 shrink-0'>
+												<RelativeTime timestamp={entry.timestamp} />
+											</span>
+											<button
+												onClick={() => startEditing(entry.id, entry.name)}
+												className='w-4 shrink-0 hover:text-gray-300 text-gray-500 transition-colors duration-150'
+												aria-label='Edit name'
+											>
+												<PencilIcon />
+											</button>
+											<button
+												onClick={() => handleCopy(entry.id, entry.password)}
+												className='w-5 shrink-0 hover:text-gray-300 text-gray-500 transition-colors duration-150'
+												aria-label='Copy password'
+											>
+												{copiedId === entry.id ? (
+													<CheckIcon />
+												) : (
+													<CopyIcon />
+												)}
+											</button>
+											<button
+												onClick={() => handleDelete(entry.id, entry.name)}
+												className='w-4 shrink-0 hover:text-red-400 text-gray-500 transition-colors duration-150'
+												aria-label='Delete entry'
+											>
+												<TrashIcon />
+											</button>
+										</div>
+										{(entry.name && (revealedIds.has(entry.id) || editingId !== entry.id)) && (
+											<button
+												onClick={() => toggleReveal(entry.id)}
+												className='text-gray-500 font-mono text-xs truncate text-left hover:text-gray-400 transition-colors duration-150'
+												aria-label={revealedIds.has(entry.id) ? 'Hide password' : 'Reveal password'}
+											>
+												{revealedIds.has(entry.id) ? entry.password : '••••••••••'}
+											</button>
+										)}
 									</li>
 								))}
 							</ul>
@@ -83,7 +205,7 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 						{history.length > 0 && (
 							<div className='border-t border-slate-700 p-3'>
 								<button
-									onClick={clearHistory}
+									onClick={handleClear}
 									className='text-red-400 hover:text-red-300 font-bold w-full text-center transition-colors duration-150'
 									aria-label='Clear history'
 								>
@@ -98,6 +220,78 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 					</div>
 				</div>
 			</div>
+
+			<dialog
+				ref={deleteDialogRef}
+				onClose={() => setDeleteConfirmId(null)}
+				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50'
+			>
+				<form method='dialog' className='grid gap-4'>
+					<p className='text-sm'>
+						Delete &ldquo;{history.find((e) => e.id === deleteConfirmId)?.name}&rdquo;?
+					</p>
+					<p className='text-xs text-gray-500'>This action cannot be undone.</p>
+					<div className='flex gap-2 justify-end'>
+						<button
+							type='button'
+							onClick={() => setDeleteConfirmId(null)}
+							className='px-4 py-2 text-xs bg-slate-700 hover:bg-slate-600 rounded'
+						>
+							Cancel
+						</button>
+						<button
+							type='submit'
+							onClick={confirmDelete}
+							className='px-4 py-2 text-xs bg-red-600 hover:bg-red-500 text-white rounded'
+						>
+							Delete
+						</button>
+					</div>
+				</form>
+			</dialog>
+
+			<dialog
+				ref={clearDialogRef}
+				onClose={() => setShowClearDialog(false)}
+				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50'
+			>
+				<form method='dialog' className='grid gap-4'>
+					<p className='text-sm font-bold'>Clear History</p>
+					<p className='text-xs text-gray-400'>
+						You have {namedCount} named password{namedCount > 1 ? 's' : ''}.
+						Do you want to delete them too?
+					</p>
+					<div className='flex gap-2 justify-end flex-wrap'>
+						<button
+							type='button'
+							onClick={() => setShowClearDialog(false)}
+							className='px-4 py-2 text-xs bg-slate-700 hover:bg-slate-600 rounded'
+						>
+							Cancel
+						</button>
+						<button
+							type='submit'
+							onClick={() => {
+								clearUnnamedHistory()
+								setShowClearDialog(false)
+							}}
+							className='px-4 py-2 text-xs bg-slate-600 hover:bg-slate-500 rounded'
+						>
+							Keep Named
+						</button>
+						<button
+							type='submit'
+							onClick={() => {
+								clearHistory()
+								setShowClearDialog(false)
+							}}
+							className='px-4 py-2 text-xs bg-red-600 hover:bg-red-500 text-white rounded'
+						>
+							Delete All
+						</button>
+					</div>
+				</form>
+			</dialog>
 		</div>
 	)
 }

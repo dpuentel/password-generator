@@ -38,6 +38,9 @@ export default function PasswordGenerator() {
 		historyCollapsed,
 		setHistoryCollapsed,
 		clearHistory,
+		clearUnnamedHistory,
+		deleteEntry,
+		renameEntry,
 		generatePassword,
 		saveCurrentToHistory
 	} = useGeneratePassword()
@@ -132,6 +135,9 @@ export default function PasswordGenerator() {
 					historyCollapsed={historyCollapsed}
 					setHistoryCollapsed={setHistoryCollapsed}
 					clearHistory={clearHistory}
+					clearUnnamedHistory={clearUnnamedHistory}
+					deleteEntry={deleteEntry}
+					renameEntry={renameEntry}
 				/>
 			</article>
 		</section>
