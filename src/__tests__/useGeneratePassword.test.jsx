@@ -484,4 +484,48 @@ describe('useGeneratePassword', () => {
 		expect(result.current.separator).toBe('_')
 		expect(result.current.language).toBe('es')
 	})
+
+	it('ignores unknown action types', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		expect(result.current.password).not.toBe('')
+	})
+
+	it('cannot disable uppercase when it is the only active charset', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeUppercase(true)
+			result.current.setIncludeLowercase(false)
+		})
+		act(() => {
+			result.current.setIncludeUppercase(false)
+		})
+		expect(result.current.includeUppercase).toBe(true)
+	})
+
+	it('cannot disable numbers when it is the only active charset', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeNumbers(true)
+			result.current.setIncludeLowercase(false)
+		})
+		act(() => {
+			result.current.setIncludeNumbers(false)
+		})
+		expect(result.current.includeNumbers).toBe(true)
+	})
+
+	it('cannot disable symbols when it is the only active charset', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setIncludeSymbols(true)
+			result.current.setIncludeLowercase(false)
+		})
+		act(() => {
+			result.current.setIncludeSymbols(false)
+		})
+		expect(result.current.includeSymbols).toBe(true)
+	})
 })
