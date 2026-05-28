@@ -528,4 +528,66 @@ describe('useGeneratePassword', () => {
 		})
 		expect(result.current.includeSymbols).toBe(true)
 	})
+
+	it('adds history entry on password generation', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		expect(result.current.history.length).toBe(1)
+		expect(result.current.history[0].password).toBe(result.current.password)
+	})
+
+	it('limits history to 5 entries', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		for (let i = 0; i < 10; i++) {
+			act(() => {
+				result.current.generatePassword()
+			})
+		}
+		expect(result.current.history.length).toBe(5)
+	})
+
+	it('clears history', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		expect(result.current.history.length).toBeGreaterThan(0)
+		act(() => {
+			result.current.clearHistory()
+		})
+		expect(result.current.history.length).toBe(0)
+	})
+
+	it('historyCollapsed defaults to true', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		expect(result.current.historyCollapsed).toBe(true)
+	})
+
+	it('setHistoryCollapsed updates state', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setHistoryCollapsed(false)
+		})
+		expect(result.current.historyCollapsed).toBe(false)
+	})
+
+	it('saves collapsed state to localStorage', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setHistoryCollapsed(false)
+		})
+		expect(JSON.parse(localStorage.getItem('password-generator-history-collapsed'))).toBe(false)
+	})
+
+	it('loads history from localStorage', () => {
+		const entries = [{ id: '1', password: 'saved-pwd', mode: 'characters', timestamp: Date.now() }]
+		localStorage.setItem('password-generator-history', JSON.stringify(entries))
+		const { result } = renderHook(() => useGeneratePassword())
+		expect(result.current.history).toContainEqual(entries[0])
+	})
+
+	it('loads collapsed state from localStorage', () => {
+		localStorage.setItem('password-generator-history-collapsed', JSON.stringify(false))
+		const { result } = renderHook(() => useGeneratePassword())
+		expect(result.current.historyCollapsed).toBe(false)
+	})
 })
