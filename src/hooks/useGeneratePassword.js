@@ -156,6 +156,24 @@ const reducer = (state, action) => {
 	case 'CLEAR_HISTORY':
 		clearHistoryStorage()
 		return { ...state, history: [] }
+	case 'CLEAR_UNNAMED_HISTORY': {
+		const updatedHistory = state.history.filter((e) => e.name)
+		saveHistory(updatedHistory)
+		return { ...state, history: updatedHistory }
+	}
+	case 'DELETE_HISTORY_ENTRY': {
+		const updatedHistory = state.history.filter((e) => e.id !== action.id)
+		saveHistory(updatedHistory)
+		return { ...state, history: updatedHistory }
+	}
+	case 'RENAME_HISTORY_ENTRY': {
+		const name = action.name?.trim().slice(0, 30) || null
+		const updatedHistory = state.history.map((e) =>
+			e.id === action.id ? { ...e, name } : e
+		)
+		saveHistory(updatedHistory)
+		return { ...state, history: updatedHistory }
+	}
 	case 'SET_HISTORY_COLLAPSED':
 		saveCollapsed(action.value)
 		return { ...state, historyCollapsed: action.value }
@@ -243,6 +261,9 @@ export function useGeneratePassword() {
 		},
 		saveCurrentToHistory: () => dispatch({ type: 'ADD_TO_HISTORY' }),
 		clearHistory: () => dispatch({ type: 'CLEAR_HISTORY' }),
+		clearUnnamedHistory: () => dispatch({ type: 'CLEAR_UNNAMED_HISTORY' }),
+		deleteEntry: (id) => dispatch({ type: 'DELETE_HISTORY_ENTRY', id }),
+		renameEntry: (id, name) => dispatch({ type: 'RENAME_HISTORY_ENTRY', id, name }),
 		setHistoryCollapsed: (value) => dispatch({ type: 'SET_HISTORY_COLLAPSED', value })
 	}
 }
