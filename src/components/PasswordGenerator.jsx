@@ -38,7 +38,8 @@ export default function PasswordGenerator() {
 		historyCollapsed,
 		setHistoryCollapsed,
 		clearHistory,
-		generatePassword
+		generatePassword,
+		saveCurrentToHistory
 	} = useGeneratePassword()
 
 	const activeCount = [includeLowercase, includeUppercase, includeNumbers, includeSymbols].filter(Boolean).length
@@ -49,7 +50,7 @@ export default function PasswordGenerator() {
 	return (
 		<section className='grid grid-cols-1 gap-4 place-items-center'>
 			<article className='w-80'>
-				<PasswordResult password={password} placeholder={placeholder} />
+				<PasswordResult password={password} placeholder={placeholder} onCopy={saveCurrentToHistory} />
 			</article>
 			<article className='bg-slate-800 min-w-48 w-80 p-4 grid grid-cols-1 gap-4 text-xs'>
 				<ModeSelector mode={mode} setMode={setMode} />

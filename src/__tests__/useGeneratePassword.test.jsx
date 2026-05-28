@@ -529,8 +529,12 @@ describe('useGeneratePassword', () => {
 		expect(result.current.includeSymbols).toBe(true)
 	})
 
-	it('adds history entry on password generation', () => {
+	it('adds history entry on explicit generate', () => {
 		const { result } = renderHook(() => useGeneratePassword())
+		expect(result.current.history.length).toBe(0)
+		act(() => {
+			result.current.generatePassword()
+		})
 		expect(result.current.history.length).toBe(1)
 		expect(result.current.history[0].password).toBe(result.current.password)
 	})

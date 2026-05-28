@@ -109,11 +109,17 @@ const generatePassphrase = (state) => {
 	return { password: pwd, entropy: PassphraseEntropyCalculator(state.wordCount, DICTIONARY_SIZE) }
 }
 
+const createHistoryEntry = (password, mode) => ({
+	id: Date.now().toString(),
+	password,
+	mode,
+	timestamp: Date.now()
+})
+
 const reducer = (state, action) => {
 	switch (action.type) {
 	case 'SET_MODE':
-		saveCollapsed(true)
-		return { ...state, mode: action.value, historyCollapsed: true }
+		return { ...state, mode: action.value }
 	case 'SET_LENGTH':
 		return { ...state, length: clampLength(action.value) }
 	case 'SET_INCLUDE_UPPERCASE':
@@ -136,16 +142,13 @@ const reducer = (state, action) => {
 		return { ...state, separator: action.value }
 	case 'SET_LANGUAGE':
 		return { ...state, language: action.value }
-	case 'GENERATE_PASSWORD': {
-		const entry = {
-			id: Date.now().toString(),
-			password: action.password,
-			mode: state.mode,
-			timestamp: Date.now()
-		}
+	case 'SET_PASSWORD':
+		return { ...state, password: action.password, entropy: action.entropy }
+	case 'ADD_TO_HISTORY': {
+		const entry = createHistoryEntry(state.password, state.mode)
 		const updatedHistory = addEntry(state.history, entry)
 		saveHistory(updatedHistory)
-		return { ...state, password: action.password, entropy: action.entropy, history: updatedHistory }
+		return { ...state, history: updatedHistory }
 	}
 	case 'CLEAR_HISTORY':
 		clearHistoryStorage()
@@ -197,7 +200,7 @@ export function useGeneratePassword() {
 		const result = state.mode === 'passphrase'
 			? generatePassphrase(state)
 			: generateCharacterPassword(state)
-		dispatch({ type: 'GENERATE_PASSWORD', ...result })
+		dispatch({ type: 'SET_PASSWORD', ...result })
 	}, [state.mode, state.length, state.includeUppercase, state.includeLowercase, state.includeNumbers, state.includeSymbols, state.excludeAmbiguous, state.wordCount, state.separator, state.language])
 
 	const maxEntropy = state.mode === 'passphrase' ? PASSPHRASE_MAX_ENTROPY : CHARACTERS_MAX_ENTROPY
@@ -232,8 +235,10 @@ export function useGeneratePassword() {
 			const result = state.mode === 'passphrase'
 				? generatePassphrase(state)
 				: generateCharacterPassword(state)
-			dispatch({ type: 'GENERATE_PASSWORD', ...result })
+			dispatch({ type: 'SET_PASSWORD', ...result })
+			dispatch({ type: 'ADD_TO_HISTORY' })
 		},
+		saveCurrentToHistory: () => dispatch({ type: 'ADD_TO_HISTORY' }),
 		clearHistory: () => dispatch({ type: 'CLEAR_HISTORY' }),
 		setHistoryCollapsed: (value) => dispatch({ type: 'SET_HISTORY_COLLAPSED', value })
 	}

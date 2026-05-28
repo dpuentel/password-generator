@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { CheckIcon, CopyIcon } from './Icons'
 
-export default function PasswordResult({ password, placeholder }) {
+export default function PasswordResult({ password, placeholder, onCopy }) {
 	const [isCopied, setIsCopied] = useState(false)
 	const [hasError, setHasError] = useState(false)
 
@@ -10,6 +10,7 @@ export default function PasswordResult({ password, placeholder }) {
 	const handleCopy = async () => {
 		try {
 			await navigator.clipboard.writeText(password)
+			if (onCopy) onCopy()
 			setIsCopied(true)
 			setTimeout(() => {
 				setIsCopied(false)

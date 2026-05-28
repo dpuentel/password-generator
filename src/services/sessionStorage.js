@@ -2,10 +2,31 @@ const HISTORY_KEY = 'password-generator-history'
 const COLLAPSED_KEY = 'password-generator-history-collapsed'
 const MAX_ENTRIES = 5
 
+const encode = (str) => {
+	try {
+		return btoa(encodeURIComponent(str))
+	} catch {
+		return str
+	}
+}
+
+const decode = (str) => {
+	try {
+		return decodeURIComponent(atob(str))
+	} catch {
+		return str
+	}
+}
+
 export const loadHistory = () => {
 	try {
 		const raw = localStorage.getItem(HISTORY_KEY)
-		return raw ? JSON.parse(raw) : []
+		if (!raw) return []
+		const entries = JSON.parse(raw)
+		return entries.map((entry) => ({
+			...entry,
+			password: decode(entry.password)
+		}))
 	} catch {
 		return []
 	}
@@ -13,7 +34,11 @@ export const loadHistory = () => {
 
 export const saveHistory = (entries) => {
 	try {
-		localStorage.setItem(HISTORY_KEY, JSON.stringify(entries))
+		const encoded = entries.map((entry) => ({
+			...entry,
+			password: encode(entry.password)
+		}))
+		localStorage.setItem(HISTORY_KEY, JSON.stringify(encoded))
 	} catch {
 		// silently fail if localStorage is unavailable
 	}

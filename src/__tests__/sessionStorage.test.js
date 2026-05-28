@@ -18,10 +18,16 @@ describe('sessionStorage', () => {
 			expect(loadHistory()).toEqual([])
 		})
 
-		it('returns saved history', () => {
+		it('returns decoded history', () => {
 			const entries = [{ id: '1', password: 'abc', mode: 'characters', timestamp: Date.now() }]
-			localStorage.setItem('password-generator-history', JSON.stringify(entries))
+			saveHistory(entries)
 			expect(loadHistory()).toEqual(entries)
+		})
+
+		it('decodes base64 encoded passwords', () => {
+			const encoded = [{ id: '1', password: btoa(encodeURIComponent('abc')), mode: 'characters', timestamp: Date.now() }]
+			localStorage.setItem('password-generator-history', JSON.stringify(encoded))
+			expect(loadHistory()[0].password).toBe('abc')
 		})
 
 		it('returns empty array when localStorage contains invalid JSON', () => {
@@ -38,10 +44,20 @@ describe('sessionStorage', () => {
 	})
 
 	describe('saveHistory', () => {
-		it('saves entries to localStorage', () => {
+		it('saves encoded entries to localStorage', () => {
 			const entries = [{ id: '1', password: 'abc', mode: 'characters', timestamp: Date.now() }]
 			saveHistory(entries)
-			expect(JSON.parse(localStorage.getItem('password-generator-history'))).toEqual(entries)
+			const raw = JSON.parse(localStorage.getItem('password-generator-history'))
+			expect(raw[0].password).toBe(btoa(encodeURIComponent('abc')))
+		})
+
+		it('roundtrips through save and load', () => {
+			const entries = [
+				{ id: '1', password: 'abc', mode: 'characters', timestamp: 1000 },
+				{ id: '2', password: 'word-word', mode: 'passphrase', timestamp: 2000 }
+			]
+			saveHistory(entries)
+			expect(loadHistory()).toEqual(entries)
 		})
 
 		it('handles save when localStorage throws', () => {
@@ -80,7 +96,7 @@ describe('sessionStorage', () => {
 
 	describe('clearHistory', () => {
 		it('removes history from localStorage', () => {
-			localStorage.setItem('password-generator-history', JSON.stringify([{ id: '1' }]))
+			saveHistory([{ id: '1', password: 'abc', mode: 'characters', timestamp: Date.now() }])
 			clearHistory()
 			expect(localStorage.getItem('password-generator-history')).toBeNull()
 		})
