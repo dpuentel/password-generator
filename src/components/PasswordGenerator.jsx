@@ -53,59 +53,73 @@ export default function PasswordGenerator() {
 			</article>
 			<article className='bg-slate-800 min-w-48 w-80 p-4 grid grid-cols-1 gap-4 text-xs'>
 				<ModeSelector mode={mode} setMode={setMode} />
-				<div className='grid transition-[grid-template-rows] duration-300 ease-in-out' style={{ gridTemplateRows: mode === 'characters' ? '1fr' : '0fr' }}>
-					<div className='overflow-hidden'>
-						<div className='grid grid-cols-1 gap-4'>
-							<PasswordLength length={length} />
-							<RangeSlider
-								min='4'
-								max='64'
-								value={length}
-								onChange={(e) => setLength(Number(e.target.value))}
-								ariaLabel='Password length'
-							/>
-							<CheckboxLabeled
-								label='Include Lowercase Letters'
-								checked={includeLowercase}
-								onChange={(e) => setIncludeLowercase(e.target.checked)}
-								disabled={includeLowercase && isLastCharset}
-							/>
-							<CheckboxLabeled
-								label='Include Uppercase Letters'
-								checked={includeUppercase}
-								onChange={(e) => setIncludeUppercase(e.target.checked)}
-								disabled={includeUppercase && isLastCharset}
-							/>
-							<CheckboxLabeled
-								label='Include Numbers'
-								checked={includeNumbers}
-								onChange={(e) => setIncludeNumbers(e.target.checked)}
-								disabled={includeNumbers && isLastCharset}
-							/>
-							<CheckboxLabeled
-								label='Include Symbols'
-								checked={includeSymbols}
-								onChange={(e) => setIncludeSymbols(e.target.checked)}
-								disabled={includeSymbols && isLastCharset}
-							/>
-							<CheckboxLabeled
-								label='Exclude Ambiguous Characters (0OIl1|)'
-								checked={excludeAmbiguous}
-								onChange={(e) => setExcludeAmbiguous(e.target.checked)}
-							/>
+				<div className='relative'>
+					<div
+						className='grid transition-all duration-300 ease-in-out'
+						style={{
+							gridTemplateRows: mode === 'characters' ? '1fr' : '0fr',
+							opacity: mode === 'characters' ? 1 : 0
+						}}
+					>
+						<div className='overflow-hidden'>
+							<div className='grid grid-cols-1 gap-4'>
+								<PasswordLength length={length} />
+								<RangeSlider
+									min='4'
+									max='64'
+									value={length}
+									onChange={(e) => setLength(Number(e.target.value))}
+									ariaLabel='Password length'
+								/>
+								<CheckboxLabeled
+									label='Include Lowercase Letters'
+									checked={includeLowercase}
+									onChange={(e) => setIncludeLowercase(e.target.checked)}
+									disabled={includeLowercase && isLastCharset}
+								/>
+								<CheckboxLabeled
+									label='Include Uppercase Letters'
+									checked={includeUppercase}
+									onChange={(e) => setIncludeUppercase(e.target.checked)}
+									disabled={includeUppercase && isLastCharset}
+								/>
+								<CheckboxLabeled
+									label='Include Numbers'
+									checked={includeNumbers}
+									onChange={(e) => setIncludeNumbers(e.target.checked)}
+									disabled={includeNumbers && isLastCharset}
+								/>
+								<CheckboxLabeled
+									label='Include Symbols'
+									checked={includeSymbols}
+									onChange={(e) => setIncludeSymbols(e.target.checked)}
+									disabled={includeSymbols && isLastCharset}
+								/>
+								<CheckboxLabeled
+									label='Exclude Ambiguous Characters (0OIl1|)'
+									checked={excludeAmbiguous}
+									onChange={(e) => setExcludeAmbiguous(e.target.checked)}
+								/>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div className='grid transition-[grid-template-rows] duration-300 ease-in-out' style={{ gridTemplateRows: mode === 'passphrase' ? '1fr' : '0fr' }}>
-					<div className='overflow-hidden'>
-						<PassphraseOptions
-							wordCount={wordCount}
-							setWordCount={setWordCount}
-							separator={separator}
-							setSeparator={setSeparator}
-							language={language}
-							setLanguage={setLanguage}
-						/>
+					<div
+						className='grid transition-all duration-300 ease-in-out'
+						style={{
+							gridTemplateRows: mode === 'passphrase' ? '1fr' : '0fr',
+							opacity: mode === 'passphrase' ? 1 : 0
+						}}
+					>
+						<div className='overflow-hidden'>
+							<PassphraseOptions
+								wordCount={wordCount}
+								setWordCount={setWordCount}
+								separator={separator}
+								setSeparator={setSeparator}
+								language={language}
+								setLanguage={setLanguage}
+							/>
+						</div>
 					</div>
 				</div>
 				<PasswordStrength entropy={entropy} maxEntropy={maxEntropy} />

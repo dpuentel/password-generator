@@ -112,7 +112,8 @@ const generatePassphrase = (state) => {
 const reducer = (state, action) => {
 	switch (action.type) {
 	case 'SET_MODE':
-		return { ...state, mode: action.value }
+		saveCollapsed(true)
+		return { ...state, mode: action.value, historyCollapsed: true }
 	case 'SET_LENGTH':
 		return { ...state, length: clampLength(action.value) }
 	case 'SET_INCLUDE_UPPERCASE':
