@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useRef } from 'react'
+import { useReducer, useEffect } from 'react'
 import {
 	CharsetSymbols,
 	CharsetNumbers,
@@ -153,21 +153,36 @@ const reducer = (state, action) => {
 	case 'SET_HISTORY_COLLAPSED':
 		saveCollapsed(action.value)
 		return { ...state, historyCollapsed: action.value }
+	case 'RESTORE_SETTINGS':
+		return { ...state, ...action.settings }
 	}
 }
 
 export function useGeneratePassword() {
 	const defaults = getDefaults()
-	const saved = useRef(loadSettings())
 
 	const [state, dispatch] = useReducer(reducer, {
 		...defaults,
-		...saved.current,
 		password: '',
 		entropy: 0,
-		history: loadHistory(),
-		historyCollapsed: loadCollapsed()
+		history: [],
+		historyCollapsed: true
 	})
+
+	useEffect(() => {
+		const saved = loadSettings()
+		if (saved) {
+			dispatch({ type: 'RESTORE_SETTINGS', settings: saved })
+		}
+		const history = loadHistory()
+		if (history.length > 0) {
+			dispatch({ type: 'RESTORE_SETTINGS', settings: { history } })
+		}
+		const collapsed = loadCollapsed()
+		if (!collapsed) {
+			dispatch({ type: 'RESTORE_SETTINGS', settings: { historyCollapsed: collapsed } })
+		}
+	}, [])
 
 	useEffect(() => {
 		const { mode, length, includeUppercase, includeLowercase, includeNumbers,
