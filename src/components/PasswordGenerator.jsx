@@ -43,7 +43,9 @@ export default function PasswordGenerator() {
 		renameEntry,
 		generatePassword,
 		saveCurrentToHistory,
-		saveNamedToHistory
+		saveNamedToHistory,
+		lastSavedId,
+		clearLastSavedId
 	} = useGeneratePassword()
 
 	const activeCount = [includeLowercase, includeUppercase, includeNumbers, includeSymbols].filter(Boolean).length
@@ -139,6 +141,8 @@ export default function PasswordGenerator() {
 					clearUnnamedHistory={clearUnnamedHistory}
 					deleteEntry={deleteEntry}
 					renameEntry={renameEntry}
+					lastSavedId={lastSavedId}
+					clearLastSavedId={clearLastSavedId}
 				/>
 			</article>
 		</section>

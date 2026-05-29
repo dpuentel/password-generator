@@ -160,13 +160,15 @@ const reducer = (state, action) => {
 				i === existingIndex ? { ...entry, name: action.name } : entry
 			)
 			saveHistory(updatedHistory)
-			return { ...state, history: updatedHistory }
+			return { ...state, history: updatedHistory, lastSavedId: state.history[existingIndex].id }
 		}
 		const namedEntry = { ...createHistoryEntry(state.password, state.mode), name: action.name }
 		const namedUpdatedHistory = addEntry(state.history, namedEntry)
 		saveHistory(namedUpdatedHistory)
-		return { ...state, history: namedUpdatedHistory }
+		return { ...state, history: namedUpdatedHistory, lastSavedId: namedEntry.id }
 	}
+	case 'CLEAR_LAST_SAVED_ID':
+		return { ...state, lastSavedId: null }
 	case 'CLEAR_HISTORY':
 		clearHistoryStorage()
 		return { ...state, history: [] }
@@ -257,6 +259,7 @@ export function useGeneratePassword() {
 		maxEntropy,
 		history: state.history,
 		historyCollapsed: state.historyCollapsed,
+		lastSavedId: state.lastSavedId,
 		setLength: (value) => dispatch({ type: 'SET_LENGTH', value }),
 		setIncludeUppercase: (value) => dispatch({ type: 'SET_INCLUDE_UPPERCASE', value }),
 		setIncludeLowercase: (value) => dispatch({ type: 'SET_INCLUDE_LOWERCASE', value }),
@@ -275,6 +278,7 @@ export function useGeneratePassword() {
 		},
 		saveCurrentToHistory: () => dispatch({ type: 'ADD_TO_HISTORY' }),
 		saveNamedToHistory: (name) => dispatch({ type: 'SAVE_NAMED_TO_HISTORY', name }),
+		clearLastSavedId: () => dispatch({ type: 'CLEAR_LAST_SAVED_ID' }),
 		clearHistory: () => dispatch({ type: 'CLEAR_HISTORY' }),
 		clearUnnamedHistory: () => dispatch({ type: 'CLEAR_UNNAMED_HISTORY' }),
 		deleteEntry: (id) => dispatch({ type: 'DELETE_HISTORY_ENTRY', id }),

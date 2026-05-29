@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { CheckIcon, CopyIcon, ChevronIcon, LockIcon, TrashIcon, PencilIcon, XIcon } from './Icons'
 import RelativeTime from './RelativeTime'
 
-export default function PasswordHistory({ history, historyCollapsed, setHistoryCollapsed, clearHistory, clearUnnamedHistory, deleteEntry, renameEntry }) {
+export default function PasswordHistory({ history, historyCollapsed, setHistoryCollapsed, clearHistory, clearUnnamedHistory, deleteEntry, renameEntry, lastSavedId, clearLastSavedId }) {
 	const [revealedIds, setRevealedIds] = useState(new Set())
 	const [copiedId, setCopiedId] = useState(null)
 	const [editingId, setEditingId] = useState(null)
@@ -10,9 +10,12 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 	const [deleteConfirmId, setDeleteConfirmId] = useState(null)
 	const [showClearDialog, setShowClearDialog] = useState(false)
 	const [searchQuery, setSearchQuery] = useState('')
+	const [highlightedId, setHighlightedId] = useState(null)
 	const editRef = useRef(null)
 	const clearDialogRef = useRef(null)
 	const deleteDialogRef = useRef(null)
+	const listRef = useRef(null)
+	const entryRefs = useRef({})
 
 	useEffect(() => {
 		if (editingId && editRef.current) {
@@ -32,6 +35,40 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 			deleteDialogRef.current.showModal()
 		}
 	}, [deleteConfirmId])
+
+	const scrollToAndHighlight = useCallback((id) => {
+		const entryEl = entryRefs.current[id]
+		const listEl = listRef.current
+		if (!entryEl || !listEl) return
+
+		const entryRect = entryEl.getBoundingClientRect()
+		const listRect = listEl.getBoundingClientRect()
+
+		const isVisible = entryRect.top >= listRect.top && entryRect.bottom <= listRect.bottom
+
+		if (!isVisible) {
+			entryEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+			setTimeout(() => {
+				setHighlightedId(id)
+				setTimeout(() => setHighlightedId(null), 1800)
+			}, 300)
+		} else {
+			setHighlightedId(id)
+			setTimeout(() => setHighlightedId(null), 1800)
+		}
+	}, [])
+
+	useEffect(() => {
+		if (lastSavedId) {
+			if (historyCollapsed) {
+				setHistoryCollapsed(false)
+			}
+			setTimeout(() => {
+				scrollToAndHighlight(lastSavedId)
+				clearLastSavedId()
+			}, historyCollapsed ? 350 : 0)
+		}
+	}, [lastSavedId, scrollToAndHighlight, clearLastSavedId, historyCollapsed, setHistoryCollapsed])
 
 	const toggleReveal = (id) => {
 		setRevealedIds((prev) => {
@@ -66,6 +103,7 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 		renameEntry(id, editValue)
 		setEditingId(null)
 		setEditValue('')
+		scrollToAndHighlight(id)
 	}
 
 	const cancelEdit = () => {
@@ -157,9 +195,13 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 						{history.length === 0 ? (
 							<p className='p-3 text-gray-500 text-center'>No history yet</p>
 						) : (
-							<ul className='divide-y divide-slate-700 max-h-60 overflow-y-auto'>
+							<ul ref={listRef} className='divide-y divide-slate-700 max-h-60 overflow-y-auto scrollbar-thin'>
 								{sortedHistory.map((entry) => (
-									<li key={entry.id} className='flex flex-col gap-1 p-3'>
+									<li
+										key={entry.id}
+										ref={(el) => { entryRefs.current[entry.id] = el }}
+										className={`flex flex-col gap-1 p-3 ${highlightedId === entry.id ? 'flash-highlight' : ''}`}
+									>
 										<div className='flex items-center gap-2'>
 											{editingId === entry.id ? (
 												<input
@@ -186,7 +228,7 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 													{entry.name ? (
 														<span className='font-bold text-gray-200'>{entry.name}</span>
 													) : (
-														revealedIds.has(entry.id) ? entry.password : '••••••••••'
+														<span className='italic text-gray-500'>no-name</span>
 													)}
 												</button>
 											)}
@@ -219,15 +261,13 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 												<TrashIcon />
 											</button>
 										</div>
-										{(entry.name && (revealedIds.has(entry.id) || editingId !== entry.id)) && (
-											<button
-												onClick={() => toggleReveal(entry.id)}
-												className='text-gray-500 font-mono text-xs truncate text-left hover:text-gray-400 transition-colors duration-150'
-												aria-label={revealedIds.has(entry.id) ? 'Hide password' : 'Reveal password'}
-											>
-												{revealedIds.has(entry.id) ? entry.password : '••••••••••'}
-											</button>
-										)}
+										<button
+											onClick={() => toggleReveal(entry.id)}
+											className='text-gray-500 font-mono text-xs truncate text-left hover:text-gray-400 transition-colors duration-150'
+											aria-label={revealedIds.has(entry.id) ? 'Hide password' : 'Reveal password'}
+										>
+											{revealedIds.has(entry.id) ? entry.password : '••••••••••'}
+										</button>
 									</li>
 								))}
 							</ul>

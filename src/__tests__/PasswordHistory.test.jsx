@@ -80,8 +80,13 @@ describe('PasswordHistory', () => {
 
 	it('renders history entries when expanded', () => {
 		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
-		const masked = screen.getAllByText('••••••••••')
-		expect(masked.length).toBeGreaterThanOrEqual(2)
+		const noName = screen.getAllByText('no-name')
+		expect(noName.length).toBeGreaterThanOrEqual(2)
+	})
+
+	it('shows named entry name', () => {
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
+		expect(screen.getByText('My Bank')).toBeInTheDocument()
 	})
 
 	it('shows relative time for each entry', () => {
@@ -101,7 +106,8 @@ describe('PasswordHistory', () => {
 		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
 		const revealButtons = screen.getAllByLabelText('Reveal password')
 		fireEvent.click(revealButtons[0])
-		fireEvent.click(screen.getByLabelText('Hide password'))
+		const hideButtons = screen.getAllByLabelText('Hide password')
+		fireEvent.click(hideButtons[0])
 		expect(screen.queryByText('abc123')).not.toBeInTheDocument()
 	})
 
@@ -225,7 +231,7 @@ describe('PasswordHistory', () => {
 	it('sorts unnamed entries by newest first', () => {
 		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
 		const items = screen.getAllByRole('listitem')
-		expect(items[0]).toHaveTextContent('••••••••••')
+		expect(items[0]).toHaveTextContent('no-name')
 		expect(items[0]).toHaveTextContent('Just now')
 	})
 
