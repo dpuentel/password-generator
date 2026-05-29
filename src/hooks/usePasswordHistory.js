@@ -72,12 +72,16 @@ export function usePasswordHistory({
 			if (historyCollapsed) {
 				setHistoryCollapsed(false)
 			}
-			setTimeout(() => {
-				scrollToAndHighlight(lastSavedId)
-				clearLastSavedId()
-			}, historyCollapsed ? 350 : 0)
+			const timeoutId = setTimeout(
+				() => {
+					scrollToAndHighlight(lastSavedId)
+					clearLastSavedId()
+				},
+				historyCollapsed ? 350 : 0
+			)
+			return () => clearTimeout(timeoutId)
 		}
-	}, [lastSavedId, scrollToAndHighlight, clearLastSavedId, historyCollapsed, setHistoryCollapsed])
+	}, [lastSavedId, historyCollapsed, setHistoryCollapsed, scrollToAndHighlight, clearLastSavedId])
 
 	const toggleReveal = (id) => {
 		setRevealedIds((prev) => {
@@ -169,8 +173,7 @@ export function usePasswordHistory({
 		.filter((e) => {
 			if (!query) return true
 			return (
-				(e.name && e.name.toLowerCase().includes(query)) ||
-				e.password.toLowerCase().includes(query)
+				(e.name && e.name.toLowerCase().includes(query)) || e.password.toLowerCase().includes(query)
 			)
 		})
 		.sort((a, b) => {

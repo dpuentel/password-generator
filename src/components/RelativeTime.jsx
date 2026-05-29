@@ -28,7 +28,8 @@ const formatAbsolute = (timestamp) => {
 export default function RelativeTime({ timestamp, prefix = '' }) {
 	return (
 		<span title={formatAbsolute(timestamp)} className='cursor-help'>
-			{prefix}{formatRelative(timestamp)}
+			{prefix}
+			{formatRelative(timestamp)}
 		</span>
 	)
 }

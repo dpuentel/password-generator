@@ -13,9 +13,8 @@ export default function PasswordStrength({ entropy = 0, maxEntropy = 426 }) {
 	const scaledEntropy = (entropy * STRENGTH_BARS) / maxEntropy
 	const filledBars = Math.min(Math.ceil(scaledEntropy), STRENGTH_BARS)
 
-	const strengthLevel = entropy > 0
-		? STRENGTH_LEVELS.find((level) => filledBars <= level.maxBars)
-		: null
+	const strengthLevel =
+		entropy > 0 ? STRENGTH_LEVELS.find((level) => filledBars <= level.maxBars) : null
 
 	const getBgEntropyElement = (index) => {
 		if (!strengthLevel) return BACKGROUND_COLOR_UNCHECKED

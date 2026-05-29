@@ -466,18 +466,21 @@ describe('useGeneratePassword', () => {
 	})
 
 	it('loads settings from localStorage', () => {
-		localStorage.setItem('password-generator-settings', JSON.stringify({
-			mode: 'passphrase',
-			wordCount: 6,
-			separator: '_',
-			language: 'es',
-			length: 10,
-			includeUppercase: false,
-			includeLowercase: true,
-			includeNumbers: false,
-			includeSymbols: false,
-			excludeAmbiguous: false
-		}))
+		localStorage.setItem(
+			'password-generator-settings',
+			JSON.stringify({
+				mode: 'passphrase',
+				wordCount: 6,
+				separator: '_',
+				language: 'es',
+				length: 10,
+				includeUppercase: false,
+				includeLowercase: true,
+				includeNumbers: false,
+				includeSymbols: false,
+				excludeAmbiguous: false
+			})
+		)
 		const { result } = renderHook(() => useGeneratePassword())
 		expect(result.current.mode).toBe('passphrase')
 		expect(result.current.wordCount).toBe(6)

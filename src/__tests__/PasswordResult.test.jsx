@@ -141,7 +141,10 @@ describe('PasswordResult', () => {
 
 	it('does not have aria-label when password is empty', () => {
 		render(<PasswordResult password='' placeholder='P4$5W0rD!' />)
-		expect(screen.getByText('P4$5W0rD!')).not.toHaveAttribute('aria-label', 'Click to select password')
+		expect(screen.getByText('P4$5W0rD!')).not.toHaveAttribute(
+			'aria-label',
+			'Click to select password'
+		)
 	})
 
 	it('opens save dialog when clicking save button', () => {

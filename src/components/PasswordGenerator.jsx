@@ -48,7 +48,9 @@ export default function PasswordGenerator() {
 		clearLastSavedId
 	} = useGeneratePassword()
 
-	const activeCount = [includeLowercase, includeUppercase, includeNumbers, includeSymbols].filter(Boolean).length
+	const activeCount = [includeLowercase, includeUppercase, includeNumbers, includeSymbols].filter(
+		Boolean
+	).length
 	const isLastCharset = activeCount <= 1
 
 	const placeholder = 'P4$5W0rD!'
@@ -56,7 +58,12 @@ export default function PasswordGenerator() {
 	return (
 		<section className='grid grid-cols-1 gap-4 place-items-center'>
 			<article className='w-80'>
-				<PasswordResult password={password} placeholder={placeholder} onCopy={saveCurrentToHistory} onSave={saveNamedToHistory} />
+				<PasswordResult
+					password={password}
+					placeholder={placeholder}
+					onCopy={saveCurrentToHistory}
+					onSave={saveNamedToHistory}
+				/>
 			</article>
 			<article className='bg-slate-800 min-w-48 w-80 p-4 grid grid-cols-1 gap-4 text-xs'>
 				<ModeSelector mode={mode} setMode={setMode} />

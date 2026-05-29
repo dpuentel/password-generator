@@ -1,9 +1,17 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @keyframes flash-highlight {
-	0%, 100% { background-color: transparent; }
-	25%, 75% { background-color: rgba(74, 222, 128, 0.15); }
-	50% { background-color: rgba(74, 222, 128, 0.25); }
+	0%,
+	100% {
+		background-color: transparent;
+	}
+	25%,
+	75% {
+		background-color: rgba(74, 222, 128, 0.15);
+	}
+	50% {
+		background-color: rgba(74, 222, 128, 0.25);
+	}
 }
 
 .flash-highlight {
