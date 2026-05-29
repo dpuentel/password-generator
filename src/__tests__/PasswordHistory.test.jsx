@@ -336,4 +336,54 @@ describe('PasswordHistory', () => {
 		const input = screen.getByLabelText('Password name')
 		expect(input.placeholder).toBe('Name this password')
 	})
+
+	it('renders search input when history has entries', () => {
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
+		expect(screen.getByLabelText('Search history')).toBeInTheDocument()
+		expect(screen.getByPlaceholderText('Search history...')).toBeInTheDocument()
+	})
+
+	it('does not render search input when no history', () => {
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} />)
+		expect(screen.queryByLabelText('Search history')).not.toBeInTheDocument()
+	})
+
+	it('filters history by name', () => {
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
+		const searchInput = screen.getByLabelText('Search history')
+		fireEvent.change(searchInput, { target: { value: 'Bank' } })
+		expect(screen.getAllByRole('listitem').length).toBe(1)
+		expect(screen.getByText('My Bank')).toBeInTheDocument()
+	})
+
+	it('filters history by password', () => {
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
+		const searchInput = screen.getByLabelText('Search history')
+		fireEvent.change(searchInput, { target: { value: 'abc123' } })
+		expect(screen.getAllByRole('listitem').length).toBe(1)
+	})
+
+	it('shows no results message when search has no matches', () => {
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
+		const searchInput = screen.getByLabelText('Search history')
+		fireEvent.change(searchInput, { target: { value: 'nonexistent' } })
+		expect(screen.queryAllByRole('listitem').length).toBe(0)
+	})
+
+	it('search is case insensitive', () => {
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
+		const searchInput = screen.getByLabelText('Search history')
+		fireEvent.change(searchInput, { target: { value: 'bank' } })
+		expect(screen.getAllByRole('listitem').length).toBe(1)
+		expect(screen.getByText('My Bank')).toBeInTheDocument()
+	})
+
+	it('clears search when input is cleared', () => {
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
+		const searchInput = screen.getByLabelText('Search history')
+		fireEvent.change(searchInput, { target: { value: 'Bank' } })
+		expect(screen.getAllByRole('listitem').length).toBe(1)
+		fireEvent.change(searchInput, { target: { value: '' } })
+		expect(screen.getAllByRole('listitem').length).toBe(3)
+	})
 })

@@ -9,6 +9,7 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 	const [editValue, setEditValue] = useState('')
 	const [deleteConfirmId, setDeleteConfirmId] = useState(null)
 	const [showClearDialog, setShowClearDialog] = useState(false)
+	const [searchQuery, setSearchQuery] = useState('')
 	const editRef = useRef(null)
 	const clearDialogRef = useRef(null)
 	const deleteDialogRef = useRef(null)
@@ -116,12 +117,21 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 		}
 	}
 
-	const sortedHistory = [...history].sort((a, b) => {
-		if (!a.name && b.name) return -1
-		if (a.name && !b.name) return 1
-		if (a.name && b.name) return a.name.localeCompare(b.name)
-		return b.timestamp - a.timestamp
-	})
+	const query = searchQuery.toLowerCase()
+	const sortedHistory = [...history]
+		.filter((e) => {
+			if (!query) return true
+			return (
+				(e.name && e.name.toLowerCase().includes(query)) ||
+				e.password.toLowerCase().includes(query)
+			)
+		})
+		.sort((a, b) => {
+			if (!a.name && b.name) return -1
+			if (a.name && !b.name) return 1
+			if (a.name && b.name) return a.name.localeCompare(b.name)
+			return b.timestamp - a.timestamp
+		})
 
 	const namedCount = history.filter((e) => e.name).length
 
@@ -221,6 +231,18 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 									</li>
 								))}
 							</ul>
+						)}
+						{history.length > 0 && (
+							<div className='border-t border-slate-700 p-3'>
+								<input
+									type='text'
+									value={searchQuery}
+									onChange={(e) => setSearchQuery(e.target.value)}
+									placeholder='Search history...'
+									className='bg-slate-900 text-gray-300 px-3 py-2 rounded text-xs w-full focus:outline-none focus:ring-1 focus:ring-gray-300'
+									aria-label='Search history'
+								/>
+							</div>
 						)}
 						{history.length > 0 && (
 							<div className='border-t border-slate-700 p-3'>
