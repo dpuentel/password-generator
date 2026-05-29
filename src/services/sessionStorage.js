@@ -1,6 +1,6 @@
 const HISTORY_KEY = 'password-generator-history'
 const COLLAPSED_KEY = 'password-generator-history-collapsed'
-const MAX_ENTRIES = 5
+const MAX_ENTRIES = 4
 
 const encode = (str) => {
 	try {

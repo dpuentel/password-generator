@@ -569,14 +569,14 @@ describe('useGeneratePassword', () => {
 		expect(result.current.history[0].password).not.toBe(firstPassword)
 	})
 
-	it('limits history to 5 entries', () => {
+	it('limits history to 4 entries', () => {
 		const { result } = renderHook(() => useGeneratePassword())
 		for (let i = 0; i < 10; i++) {
 			act(() => {
 				result.current.generatePassword()
 			})
 		}
-		expect(result.current.history.length).toBe(5)
+		expect(result.current.history.length).toBe(4)
 	})
 
 	it('clears history', () => {

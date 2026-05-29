@@ -82,15 +82,15 @@ describe('sessionStorage', () => {
 			expect(result).toEqual([entry, existing])
 		})
 
-		it('limits history to 5 entries', () => {
-			const entries = Array.from({ length: 5 }, (_, i) => ({
+		it('limits history to 4 entries', () => {
+			const entries = Array.from({ length: 4 }, (_, i) => ({
 				id: String(i), password: `pwd${i}`, mode: 'characters', timestamp: i
 			}))
-			const entry = { id: '5', password: 'new', mode: 'characters', timestamp: 5 }
+			const entry = { id: '4', password: 'new', mode: 'characters', timestamp: 4 }
 			const result = addEntry(entries, entry)
-			expect(result).toHaveLength(5)
+			expect(result).toHaveLength(4)
 			expect(result[0]).toEqual(entry)
-			expect(result[4]).toEqual(entries[3])
+			expect(result[3]).toEqual(entries[2])
 		})
 	})
 

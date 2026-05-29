@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { CheckIcon, CopyIcon, ChevronIcon, LockIcon, TrashIcon, PencilIcon } from './Icons'
+import { CheckIcon, CopyIcon, ChevronIcon, LockIcon, TrashIcon, PencilIcon, XIcon } from './Icons'
 import RelativeTime from './RelativeTime'
 
 export default function PasswordHistory({ history, historyCollapsed, setHistoryCollapsed, clearHistory, clearUnnamedHistory, deleteEntry, renameEntry }) {
@@ -234,14 +234,25 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 						)}
 						{history.length > 0 && (
 							<div className='border-t border-slate-700 p-3'>
-								<input
-									type='text'
-									value={searchQuery}
-									onChange={(e) => setSearchQuery(e.target.value)}
-									placeholder='Search history...'
-									className='bg-slate-900 text-gray-300 px-3 py-2 rounded text-xs w-full focus:outline-none focus:ring-1 focus:ring-gray-300'
-									aria-label='Search history'
-								/>
+								<div className='relative'>
+									<input
+										type='text'
+										value={searchQuery}
+										onChange={(e) => setSearchQuery(e.target.value)}
+										placeholder='Search history...'
+										className='bg-slate-900 text-gray-300 px-3 py-2 pr-8 rounded text-xs w-full focus:outline-none focus:ring-1 focus:ring-gray-300'
+										aria-label='Search history'
+									/>
+									{searchQuery && (
+										<button
+											onClick={() => setSearchQuery('')}
+											className='absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 hover:text-gray-300 transition-colors duration-150'
+											aria-label='Clear search'
+										>
+											<XIcon />
+										</button>
+									)}
+								</div>
 							</div>
 						)}
 						{history.length > 0 && (

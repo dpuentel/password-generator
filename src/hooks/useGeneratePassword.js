@@ -153,6 +153,15 @@ const reducer = (state, action) => {
 		saveHistory(updatedHistory)
 		return { ...state, history: updatedHistory }
 	}
+	case 'SAVE_NAMED_TO_HISTORY': {
+		if (state.history.some((entry) => entry.password === state.password)) {
+			return state
+		}
+		const namedEntry = { ...createHistoryEntry(state.password, state.mode), name: action.name }
+		const namedUpdatedHistory = addEntry(state.history, namedEntry)
+		saveHistory(namedUpdatedHistory)
+		return { ...state, history: namedUpdatedHistory }
+	}
 	case 'CLEAR_HISTORY':
 		clearHistoryStorage()
 		return { ...state, history: [] }
@@ -260,6 +269,7 @@ export function useGeneratePassword() {
 			dispatch({ type: 'ADD_TO_HISTORY' })
 		},
 		saveCurrentToHistory: () => dispatch({ type: 'ADD_TO_HISTORY' }),
+		saveNamedToHistory: (name) => dispatch({ type: 'SAVE_NAMED_TO_HISTORY', name }),
 		clearHistory: () => dispatch({ type: 'CLEAR_HISTORY' }),
 		clearUnnamedHistory: () => dispatch({ type: 'CLEAR_UNNAMED_HISTORY' }),
 		deleteEntry: (id) => dispatch({ type: 'DELETE_HISTORY_ENTRY', id }),
