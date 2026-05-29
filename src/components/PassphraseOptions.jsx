@@ -11,7 +11,7 @@ const SEPARATORS = [
 
 export default function PassphraseOptions({ wordCount, setWordCount, separator, setSeparator, language, setLanguage }) {
 	return (
-		<>
+		<div className='grid grid-cols-1 gap-4'>
 			<PasswordLength length={wordCount} label='Word Count' />
 			<RangeSlider
 				min='3'
@@ -20,7 +20,7 @@ export default function PassphraseOptions({ wordCount, setWordCount, separator, 
 				onChange={(e) => setWordCount(Number(e.target.value))}
 				ariaLabel='Word count'
 			/>
-			<div>
+			<div className='py-1'>
 				<span className='block mb-2'>Separator</span>
 				<div className='flex gap-2 flex-wrap'>
 					{SEPARATORS.map((s) => (
@@ -37,7 +37,7 @@ export default function PassphraseOptions({ wordCount, setWordCount, separator, 
 					))}
 				</div>
 			</div>
-			<div>
+			<div className='py-1'>
 				<label className='block mb-2'>Language</label>
 				<select
 					value={language}
@@ -52,6 +52,6 @@ export default function PassphraseOptions({ wordCount, setWordCount, separator, 
 					))}
 				</select>
 			</div>
-		</>
+		</div>
 	)
 }

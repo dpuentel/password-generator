@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useRef } from 'react'
+import { useReducer, useEffect } from 'react'
 import {
 	CharsetSymbols,
 	CharsetNumbers,
@@ -12,6 +12,7 @@ import {
 import { getDictionary, getBrowserLanguage, DICTIONARY_SIZE } from '../services/dictionaries'
 import { PasswordEntropyCalculator, PassphraseEntropyCalculator } from '../services/PasswordEntropyCalculator'
 import { loadSettings, saveSettings } from '../services/localStorage'
+import { loadHistory, saveHistory, addEntry, clearHistory as clearHistoryStorage, loadCollapsed, saveCollapsed } from '../services/sessionStorage'
 
 const MIN_LENGTH = 4
 const MAX_LENGTH = 64
@@ -108,6 +109,19 @@ const generatePassphrase = (state) => {
 	return { password: pwd, entropy: PassphraseEntropyCalculator(state.wordCount, DICTIONARY_SIZE) }
 }
 
+const createHistoryEntry = (password, mode) => ({
+	id: Date.now().toString(),
+	password,
+	mode,
+	timestamp: Date.now()
+})
+
+const renameExistingEntry = (existingIndex, name) => (entry, i) =>
+	i === existingIndex ? { ...entry, name } : entry
+
+const renameEntryById = (id, name) => (e) =>
+	e.id === id ? { ...e, name } : e
+
 const reducer = (state, action) => {
 	switch (action.type) {
 	case 'SET_MODE':
@@ -134,21 +148,83 @@ const reducer = (state, action) => {
 		return { ...state, separator: action.value }
 	case 'SET_LANGUAGE':
 		return { ...state, language: action.value }
-	case 'GENERATE_PASSWORD':
+	case 'SET_PASSWORD':
 		return { ...state, password: action.password, entropy: action.entropy }
+	case 'ADD_TO_HISTORY': {
+		if (state.history.some((entry) => entry.password === state.password)) {
+			return state
+		}
+		const entry = createHistoryEntry(state.password, state.mode)
+		const updatedHistory = addEntry(state.history, entry)
+		saveHistory(updatedHistory)
+		return { ...state, history: updatedHistory }
+	}
+	case 'SAVE_NAMED_TO_HISTORY': {
+		const existingIndex = state.history.findIndex((entry) => entry.password === state.password)
+		if (existingIndex !== -1) {
+			const updatedHistory = state.history.map(renameExistingEntry(existingIndex, action.name))
+			saveHistory(updatedHistory)
+			return { ...state, history: updatedHistory, lastSavedId: state.history[existingIndex].id }
+		}
+		const namedEntry = { ...createHistoryEntry(state.password, state.mode), name: action.name }
+		const namedUpdatedHistory = addEntry(state.history, namedEntry)
+		saveHistory(namedUpdatedHistory)
+		return { ...state, history: namedUpdatedHistory, lastSavedId: namedEntry.id }
+	}
+	case 'CLEAR_LAST_SAVED_ID':
+		return { ...state, lastSavedId: null }
+	case 'CLEAR_HISTORY':
+		clearHistoryStorage()
+		return { ...state, history: [] }
+	case 'CLEAR_UNNAMED_HISTORY': {
+		const updatedHistory = state.history.filter((e) => e.name)
+		saveHistory(updatedHistory)
+		return { ...state, history: updatedHistory }
+	}
+	case 'DELETE_HISTORY_ENTRY': {
+		const updatedHistory = state.history.filter((e) => e.id !== action.id)
+		saveHistory(updatedHistory)
+		return { ...state, history: updatedHistory }
+	}
+	case 'RENAME_HISTORY_ENTRY': {
+		const name = action.name?.trim().slice(0, 30) || null
+		const updatedHistory = state.history.map(renameEntryById(action.id, name))
+		saveHistory(updatedHistory)
+		return { ...state, history: updatedHistory }
+	}
+	case 'SET_HISTORY_COLLAPSED':
+		saveCollapsed(action.value)
+		return { ...state, historyCollapsed: action.value }
+	case 'RESTORE_SETTINGS':
+		return { ...state, ...action.settings }
 	}
 }
 
 export function useGeneratePassword() {
 	const defaults = getDefaults()
-	const saved = useRef(loadSettings())
 
 	const [state, dispatch] = useReducer(reducer, {
 		...defaults,
-		...saved.current,
 		password: '',
-		entropy: 0
+		entropy: 0,
+		history: [],
+		historyCollapsed: true
 	})
+
+	useEffect(() => {
+		const saved = loadSettings()
+		if (saved) {
+			dispatch({ type: 'RESTORE_SETTINGS', settings: saved })
+		}
+		const history = loadHistory()
+		if (history.length > 0) {
+			dispatch({ type: 'RESTORE_SETTINGS', settings: { history } })
+		}
+		const collapsed = loadCollapsed()
+		if (!collapsed) {
+			dispatch({ type: 'RESTORE_SETTINGS', settings: { historyCollapsed: collapsed } })
+		}
+	}, [])
 
 	useEffect(() => {
 		const { mode, length, includeUppercase, includeLowercase, includeNumbers,
@@ -163,7 +239,7 @@ export function useGeneratePassword() {
 		const result = state.mode === 'passphrase'
 			? generatePassphrase(state)
 			: generateCharacterPassword(state)
-		dispatch({ type: 'GENERATE_PASSWORD', ...result })
+		dispatch({ type: 'SET_PASSWORD', ...result })
 	}, [state.mode, state.length, state.includeUppercase, state.includeLowercase, state.includeNumbers, state.includeSymbols, state.excludeAmbiguous, state.wordCount, state.separator, state.language])
 
 	const maxEntropy = state.mode === 'passphrase' ? PASSPHRASE_MAX_ENTROPY : CHARACTERS_MAX_ENTROPY
@@ -183,6 +259,9 @@ export function useGeneratePassword() {
 		language: state.language,
 		entropy: state.entropy,
 		maxEntropy,
+		history: state.history,
+		historyCollapsed: state.historyCollapsed,
+		lastSavedId: state.lastSavedId,
 		setLength: (value) => dispatch({ type: 'SET_LENGTH', value }),
 		setIncludeUppercase: (value) => dispatch({ type: 'SET_INCLUDE_UPPERCASE', value }),
 		setIncludeLowercase: (value) => dispatch({ type: 'SET_INCLUDE_LOWERCASE', value }),
@@ -196,7 +275,16 @@ export function useGeneratePassword() {
 			const result = state.mode === 'passphrase'
 				? generatePassphrase(state)
 				: generateCharacterPassword(state)
-			dispatch({ type: 'GENERATE_PASSWORD', ...result })
-		}
+			dispatch({ type: 'SET_PASSWORD', ...result })
+			dispatch({ type: 'ADD_TO_HISTORY' })
+		},
+		saveCurrentToHistory: () => dispatch({ type: 'ADD_TO_HISTORY' }),
+		saveNamedToHistory: (name) => dispatch({ type: 'SAVE_NAMED_TO_HISTORY', name }),
+		clearLastSavedId: () => dispatch({ type: 'CLEAR_LAST_SAVED_ID' }),
+		clearHistory: () => dispatch({ type: 'CLEAR_HISTORY' }),
+		clearUnnamedHistory: () => dispatch({ type: 'CLEAR_UNNAMED_HISTORY' }),
+		deleteEntry: (id) => dispatch({ type: 'DELETE_HISTORY_ENTRY', id }),
+		renameEntry: (id, name) => dispatch({ type: 'RENAME_HISTORY_ENTRY', id, name }),
+		setHistoryCollapsed: (value) => dispatch({ type: 'SET_HISTORY_COLLAPSED', value })
 	}
 }

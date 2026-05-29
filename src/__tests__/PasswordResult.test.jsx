@@ -26,9 +26,14 @@ describe('PasswordResult', () => {
 		expect(screen.getByTitle('Copy')).toBeInTheDocument()
 	})
 
+	it('shows save icon', () => {
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
+		expect(screen.getByTitle('Save')).toBeInTheDocument()
+	})
+
 	it('calls navigator.clipboard.writeText on copy', async () => {
 		render(<PasswordResult password='secret123' placeholder='P4$5W0rD!' />)
-		fireEvent.click(screen.getByRole('button'))
+		fireEvent.click(screen.getByLabelText('Copy password to clipboard'))
 		await act(async () => {
 			await Promise.resolve()
 		})
@@ -37,7 +42,7 @@ describe('PasswordResult', () => {
 
 	it('shows check icon after copying', async () => {
 		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
-		fireEvent.click(screen.getByRole('button'))
+		fireEvent.click(screen.getByLabelText('Copy password to clipboard'))
 		await act(async () => {
 			await Promise.resolve()
 		})
@@ -46,7 +51,7 @@ describe('PasswordResult', () => {
 
 	it('reverts to copy icon after 1 second', async () => {
 		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
-		fireEvent.click(screen.getByRole('button'))
+		fireEvent.click(screen.getByLabelText('Copy password to clipboard'))
 		await act(async () => {
 			await Promise.resolve()
 		})
@@ -60,7 +65,7 @@ describe('PasswordResult', () => {
 
 	it('applies underline class when copied', async () => {
 		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
-		fireEvent.click(screen.getByRole('button'))
+		fireEvent.click(screen.getByLabelText('Copy password to clipboard'))
 		await act(async () => {
 			await Promise.resolve()
 		})
@@ -70,7 +75,7 @@ describe('PasswordResult', () => {
 
 	it('has aria-label for copy button', () => {
 		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
-		expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Copy password to clipboard')
+		expect(screen.getByLabelText('Copy password to clipboard')).toBeInTheDocument()
 	})
 
 	it('has aria-live on password text', () => {
@@ -87,7 +92,7 @@ describe('PasswordResult', () => {
 	it('shows error indicator when clipboard write fails', async () => {
 		navigator.clipboard.writeText.mockRejectedValueOnce(new Error('Clipboard error'))
 		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
-		fireEvent.click(screen.getByRole('button'))
+		fireEvent.click(screen.getByLabelText('Copy password to clipboard'))
 		await act(async () => {
 			await Promise.resolve()
 		})
@@ -97,7 +102,7 @@ describe('PasswordResult', () => {
 	it('reverts error indicator after 1 second', async () => {
 		navigator.clipboard.writeText.mockRejectedValueOnce(new Error('Clipboard error'))
 		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
-		fireEvent.click(screen.getByRole('button'))
+		fireEvent.click(screen.getByLabelText('Copy password to clipboard'))
 		await act(async () => {
 			await Promise.resolve()
 		})
@@ -137,5 +142,112 @@ describe('PasswordResult', () => {
 	it('does not have aria-label when password is empty', () => {
 		render(<PasswordResult password='' placeholder='P4$5W0rD!' />)
 		expect(screen.getByText('P4$5W0rD!')).not.toHaveAttribute('aria-label', 'Click to select password')
+	})
+
+	it('opens save dialog when clicking save button', () => {
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
+		fireEvent.click(screen.getByLabelText('Save password'))
+		expect(screen.getByLabelText('Password name')).toBeInTheDocument()
+	})
+
+	it('calls onSave with name when saving', () => {
+		const onSave = vi.fn()
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' onSave={onSave} />)
+		fireEvent.click(screen.getByLabelText('Save password'))
+		const input = screen.getByLabelText('Password name')
+		fireEvent.change(input, { target: { value: 'My Password' } })
+		const dialog = document.querySelector('dialog')
+		const saveBtn = dialog.querySelector('.bg-green-600')
+		fireEvent.click(saveBtn)
+		expect(onSave).toHaveBeenCalledWith('My Password')
+	})
+
+	it('calls onSave with null when saving without name', () => {
+		const onSave = vi.fn()
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' onSave={onSave} />)
+		fireEvent.click(screen.getByLabelText('Save password'))
+		const dialog = document.querySelector('dialog')
+		const saveBtn = dialog.querySelector('.bg-green-600')
+		fireEvent.click(saveBtn)
+		expect(onSave).toHaveBeenCalledWith(null)
+	})
+
+	it('closes save dialog when clicking cancel', () => {
+		const onSave = vi.fn()
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' onSave={onSave} />)
+		fireEvent.click(screen.getByLabelText('Save password'))
+		const dialog = document.querySelector('dialog')
+		const cancelBtn = dialog.querySelector('.bg-slate-700')
+		fireEvent.click(cancelBtn)
+		expect(onSave).not.toHaveBeenCalled()
+	})
+
+	it('limits save name to 30 characters', () => {
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
+		fireEvent.click(screen.getByLabelText('Save password'))
+		const input = screen.getByLabelText('Password name')
+		expect(input.maxLength).toBe(30)
+	})
+
+	it('save button is disabled when no password', () => {
+		render(<PasswordResult password='' placeholder='P4$5W0rD!' />)
+		expect(screen.getByLabelText('Save password')).toBeDisabled()
+	})
+
+	it('saves on Enter key', () => {
+		const onSave = vi.fn()
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' onSave={onSave} />)
+		fireEvent.click(screen.getByLabelText('Save password'))
+		const input = screen.getByLabelText('Password name')
+		fireEvent.change(input, { target: { value: 'Enter Name' } })
+		fireEvent.keyDown(input, { key: 'Enter' })
+		expect(onSave).toHaveBeenCalledWith('Enter Name')
+	})
+
+	it('closes dialog on Escape key', () => {
+		const onSave = vi.fn()
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' onSave={onSave} />)
+		fireEvent.click(screen.getByLabelText('Save password'))
+		const input = screen.getByLabelText('Password name')
+		fireEvent.keyDown(input, { key: 'Escape' })
+		expect(onSave).not.toHaveBeenCalled()
+	})
+
+	it('closes dialog on backdrop click', () => {
+		const onSave = vi.fn()
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' onSave={onSave} />)
+		fireEvent.click(screen.getByLabelText('Save password'))
+		const dialog = document.querySelector('dialog')
+		fireEvent.click(dialog)
+		expect(onSave).not.toHaveBeenCalled()
+	})
+
+	it('calls onCopy when provided', async () => {
+		const onCopy = vi.fn()
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' onCopy={onCopy} />)
+		fireEvent.click(screen.getByLabelText('Copy password to clipboard'))
+		await act(async () => {
+			await Promise.resolve()
+		})
+		expect(onCopy).toHaveBeenCalled()
+	})
+
+	it('handles missing onCopy gracefully', async () => {
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
+		fireEvent.click(screen.getByLabelText('Copy password to clipboard'))
+		await act(async () => {
+			await Promise.resolve()
+		})
+	})
+
+	it('calls dialog.close when saving', () => {
+		const onSave = vi.fn()
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' onSave={onSave} />)
+		fireEvent.click(screen.getByLabelText('Save password'))
+		const dialog = document.querySelector('dialog')
+		const closeSpy = vi.spyOn(dialog, 'close')
+		const saveBtn = dialog.querySelector('.bg-green-600')
+		fireEvent.click(saveBtn)
+		expect(closeSpy).toHaveBeenCalled()
 	})
 })

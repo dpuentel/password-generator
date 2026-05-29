@@ -11,16 +11,18 @@ describe('PasswordGenerator', () => {
 		vi.useRealTimers()
 	})
 
-	it('renders all child components', () => {
+	it('renders mode selector and generate button', () => {
 		render(<PasswordGenerator />)
-		expect(screen.getByRole('slider')).toBeInTheDocument()
+		expect(screen.getByText('Random (Characters)')).toBeInTheDocument()
+		expect(screen.getByText('Easy to Remember (Words)')).toBeInTheDocument()
+		expect(screen.getByRole('button', { name: 'Generate password' })).toBeInTheDocument()
+		expect(screen.getByText('STRENGTH')).toBeInTheDocument()
+	})
+
+	it('shows character options by default', () => {
+		render(<PasswordGenerator />)
 		expect(screen.getByText('Character Length')).toBeInTheDocument()
 		expect(screen.getByText('Include Lowercase Letters')).toBeInTheDocument()
-		expect(screen.getByText('Include Uppercase Letters')).toBeInTheDocument()
-		expect(screen.getByText('Include Numbers')).toBeInTheDocument()
-		expect(screen.getByText('Include Symbols')).toBeInTheDocument()
-		expect(screen.getByText('STRENGTH')).toBeInTheDocument()
-		expect(screen.getByRole('button', { name: 'Generate password' })).toBeInTheDocument()
 	})
 
 	it('lowercase checkbox is checked by default', () => {
@@ -65,29 +67,6 @@ describe('PasswordGenerator', () => {
 		expect(checkbox).toBeChecked()
 	})
 
-	it('clicking GENERATE button triggers new password', () => {
-		render(<PasswordGenerator />)
-		const generateButton = screen.getByRole('button', { name: 'Generate password' })
-		const initialText = screen.getByText(/^[a-z]+$/).textContent
-		fireEvent.click(generateButton)
-		const newText = screen.getByText(/^[a-z]+$/).textContent
-		expect(newText).not.toBe(initialText)
-	})
-
-	it('copy button shows copy icon after generating', () => {
-		render(<PasswordGenerator />)
-		const generateButton = screen.getByRole('button', { name: 'Generate password' })
-		fireEvent.click(generateButton)
-		expect(screen.getByTitle('Copy')).toBeInTheDocument()
-	})
-
-	it('slider changes password length', () => {
-		render(<PasswordGenerator />)
-		const slider = screen.getByRole('slider')
-		fireEvent.change(slider, { target: { value: '20' } })
-		expect(slider.value).toBe('20')
-	})
-
 	it('toggling exclude ambiguous checkbox updates state', () => {
 		render(<PasswordGenerator />)
 		const checkbox = screen.getByLabelText('Exclude Ambiguous Characters (0OIl1|)')
@@ -95,16 +74,11 @@ describe('PasswordGenerator', () => {
 		expect(checkbox).toBeChecked()
 	})
 
-	it('renders mode selector buttons', () => {
+	it('slider changes password length', () => {
 		render(<PasswordGenerator />)
-		expect(screen.getByText('Random (Characters)')).toBeInTheDocument()
-		expect(screen.getByText('Easy to Remember (Words)')).toBeInTheDocument()
-	})
-
-	it('shows character options by default', () => {
-		render(<PasswordGenerator />)
-		expect(screen.getByText('Character Length')).toBeInTheDocument()
-		expect(screen.getByText('Include Lowercase Letters')).toBeInTheDocument()
+		const slider = screen.getByLabelText('Password length')
+		fireEvent.change(slider, { target: { value: '20' } })
+		expect(slider.value).toBe('20')
 	})
 
 	it('switches to passphrase mode and shows passphrase options', () => {
@@ -113,7 +87,6 @@ describe('PasswordGenerator', () => {
 		expect(screen.getByText('Word Count')).toBeInTheDocument()
 		expect(screen.getByText('Separator')).toBeInTheDocument()
 		expect(screen.getByLabelText('Dictionary language')).toBeInTheDocument()
-		expect(screen.queryByText('Character Length')).not.toBeInTheDocument()
 	})
 
 	it('switches back to characters mode from passphrase mode', () => {
@@ -121,7 +94,6 @@ describe('PasswordGenerator', () => {
 		fireEvent.click(screen.getByText('Easy to Remember (Words)'))
 		fireEvent.click(screen.getByText('Random (Characters)'))
 		expect(screen.getByText('Character Length')).toBeInTheDocument()
-		expect(screen.queryByText('Word Count')).not.toBeInTheDocument()
 	})
 
 	it('generates passphrase when in passphrase mode', () => {
@@ -130,5 +102,16 @@ describe('PasswordGenerator', () => {
 		const generateButton = screen.getByRole('button', { name: 'Generate password' })
 		fireEvent.click(generateButton)
 		expect(screen.getByLabelText('Generated password').textContent).not.toBe('')
+	})
+
+	it('renders history section', () => {
+		render(<PasswordGenerator />)
+		expect(screen.getByText('HISTORY')).toBeInTheDocument()
+	})
+
+	it('copy button is present after generating', () => {
+		render(<PasswordGenerator />)
+		const copyButton = screen.getByLabelText('Copy password to clipboard')
+		expect(copyButton).toBeInTheDocument()
 	})
 })

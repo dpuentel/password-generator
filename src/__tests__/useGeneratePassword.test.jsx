@@ -528,4 +528,254 @@ describe('useGeneratePassword', () => {
 		})
 		expect(result.current.includeSymbols).toBe(true)
 	})
+
+	it('adds history entry on explicit generate', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		expect(result.current.history.length).toBe(0)
+		act(() => {
+			result.current.generatePassword()
+		})
+		expect(result.current.history.length).toBe(1)
+		expect(result.current.history[0].password).toBe(result.current.password)
+	})
+
+	it('does not add duplicate password to history', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		const firstPassword = result.current.password
+		expect(result.current.history.length).toBe(1)
+		act(() => {
+			result.current.saveCurrentToHistory()
+		})
+		expect(result.current.history.length).toBe(1)
+		expect(result.current.history[0].password).toBe(firstPassword)
+	})
+
+	it('adds different passwords to history', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		const firstPassword = result.current.password
+		act(() => {
+			result.current.setLength(20)
+		})
+		act(() => {
+			result.current.generatePassword()
+		})
+		expect(result.current.history.length).toBe(2)
+		expect(result.current.history[0].password).not.toBe(firstPassword)
+	})
+
+	it('limits history to 4 entries', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		for (let i = 0; i < 10; i++) {
+			act(() => {
+				result.current.generatePassword()
+			})
+		}
+		expect(result.current.history.length).toBe(4)
+	})
+
+	it('clears history', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		expect(result.current.history.length).toBeGreaterThan(0)
+		act(() => {
+			result.current.clearHistory()
+		})
+		expect(result.current.history.length).toBe(0)
+	})
+
+	it('historyCollapsed defaults to true', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		expect(result.current.historyCollapsed).toBe(true)
+	})
+
+	it('setHistoryCollapsed updates state', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setHistoryCollapsed(false)
+		})
+		expect(result.current.historyCollapsed).toBe(false)
+	})
+
+	it('saves collapsed state to localStorage', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.setHistoryCollapsed(false)
+		})
+		expect(JSON.parse(localStorage.getItem('password-generator-history-collapsed'))).toBe(false)
+	})
+
+	it('loads history from localStorage', () => {
+		const entries = [{ id: '1', password: 'saved-pwd', mode: 'characters', timestamp: Date.now() }]
+		localStorage.setItem('password-generator-history', JSON.stringify(entries))
+		const { result } = renderHook(() => useGeneratePassword())
+		expect(result.current.history).toContainEqual(entries[0])
+	})
+
+	it('loads collapsed state from localStorage', () => {
+		localStorage.setItem('password-generator-history-collapsed', JSON.stringify(false))
+		const { result } = renderHook(() => useGeneratePassword())
+		expect(result.current.historyCollapsed).toBe(false)
+	})
+
+	it('deletes history entry', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		expect(result.current.history.length).toBe(1)
+		const entryId = result.current.history[0].id
+		act(() => {
+			result.current.deleteEntry(entryId)
+		})
+		expect(result.current.history.length).toBe(0)
+	})
+
+	it('renames history entry', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		const entryId = result.current.history[0].id
+		act(() => {
+			result.current.renameEntry(entryId, 'My Password')
+		})
+		expect(result.current.history[0].name).toBe('My Password')
+	})
+
+	it('trims and limits rename to 30 characters', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		const entryId = result.current.history[0].id
+		act(() => {
+			result.current.renameEntry(entryId, '  A very long password name that exceeds 30 chars  ')
+		})
+		expect(result.current.history[0].name).toBe('A very long password name that')
+	})
+
+	it('sets name to null for empty rename', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		const entryId = result.current.history[0].id
+		act(() => {
+			result.current.renameEntry(entryId, '   ')
+		})
+		expect(result.current.history[0].name).toBeNull()
+	})
+
+	it('clears only unnamed history', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		act(() => {
+			result.current.renameEntry(result.current.history[0].id, 'Named')
+		})
+		act(() => {
+			result.current.setLength(20)
+		})
+		act(() => {
+			result.current.generatePassword()
+		})
+		expect(result.current.history.length).toBe(2)
+		act(() => {
+			result.current.clearUnnamedHistory()
+		})
+		expect(result.current.history.length).toBe(1)
+		expect(result.current.history[0].name).toBe('Named')
+	})
+
+	it('preserves named entries when adding unnamed entries beyond limit', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		act(() => {
+			result.current.renameEntry(result.current.history[0].id, 'Preserved')
+		})
+		for (let i = 0; i < 10; i++) {
+			act(() => {
+				result.current.setLength(4 + i)
+			})
+			act(() => {
+				result.current.generatePassword()
+			})
+		}
+		const namedEntries = result.current.history.filter((e) => e.name)
+		expect(namedEntries.length).toBe(1)
+		expect(namedEntries[0].name).toBe('Preserved')
+		const unnamedEntries = result.current.history.filter((e) => !e.name)
+		expect(unnamedEntries.length).toBeLessThanOrEqual(4)
+	})
+
+	it('renames existing entry when saving as named', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		expect(result.current.history.length).toBe(1)
+		expect(result.current.history[0].name).toBeFalsy()
+		act(() => {
+			result.current.saveNamedToHistory('My Bank')
+		})
+		expect(result.current.history.length).toBe(1)
+		expect(result.current.history[0].name).toBe('My Bank')
+	})
+
+	it('creates new named entry when password not in history', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.saveNamedToHistory('Saved')
+		})
+		expect(result.current.history.length).toBe(1)
+		expect(result.current.history[0].name).toBe('Saved')
+		expect(result.current.history[0].password).toBe(result.current.password)
+	})
+
+	it('clearLastSavedId resets lastSavedId to null', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.saveNamedToHistory('Test')
+		})
+		expect(result.current.lastSavedId).toBeTruthy()
+		act(() => {
+			result.current.clearLastSavedId()
+		})
+		expect(result.current.lastSavedId).toBeNull()
+	})
+
+	it('renames entry with trimmed and sliced name', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		const entryId = result.current.history[0].id
+		act(() => {
+			result.current.renameEntry(entryId, '  A very long name that exceeds limit  ')
+		})
+		expect(result.current.history[0].name).toBe('A very long name that exceeds ')
+	})
+
+	it('renames entry with empty name to null', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		const entryId = result.current.history[0].id
+		act(() => {
+			result.current.renameEntry(entryId, '   ')
+		})
+		expect(result.current.history[0].name).toBeNull()
+	})
 })
