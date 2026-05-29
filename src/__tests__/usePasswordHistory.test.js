@@ -341,4 +341,22 @@ describe('usePasswordHistory', () => {
 			expect(clearLastSavedId).toHaveBeenCalled()
 		})
 	})
+
+	describe('handleDialogBackdropClick', () => {
+		it('calls closeFn when target is currentTarget', () => {
+			const { result } = renderHistoryHook()
+			const closeFn = vi.fn()
+			const event = { target: 'dialog', currentTarget: 'dialog' }
+			result.current.handleDialogBackdropClick(event, closeFn)
+			expect(closeFn).toHaveBeenCalled()
+		})
+
+		it('does not call closeFn when target differs from currentTarget', () => {
+			const { result } = renderHistoryHook()
+			const closeFn = vi.fn()
+			const event = { target: 'button', currentTarget: 'dialog' }
+			result.current.handleDialogBackdropClick(event, closeFn)
+			expect(closeFn).not.toHaveBeenCalled()
+		})
+	})
 })
