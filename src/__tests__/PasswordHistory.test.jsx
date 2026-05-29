@@ -111,10 +111,12 @@ describe('PasswordHistory', () => {
 		expect(screen.queryByText('abc123')).not.toBeInTheDocument()
 	})
 
-	it('copies password when clicking copy button', () => {
+	it('copies password when clicking copy button', async () => {
 		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
 		const copyButtons = screen.getAllByLabelText('Copy password')
-		fireEvent.click(copyButtons[0])
+		await act(async () => {
+			fireEvent.click(copyButtons[0])
+		})
 		expect(navigator.clipboard.writeText).toHaveBeenCalledWith('abc123')
 	})
 
