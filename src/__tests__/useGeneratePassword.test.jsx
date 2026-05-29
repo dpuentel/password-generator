@@ -770,10 +770,28 @@ describe('useGeneratePassword', () => {
 		expect(result.current.history[0].name).toBe('A very long name that exceeds ')
 	})
 
-	it('renames entry with empty name to null', () => {
+	it('trims and slices name to 30 characters', () => {
 		const { result } = renderHook(() => useGeneratePassword())
 		act(() => {
 			result.current.generatePassword()
+		})
+		act(() => {
+			result.current.saveNamedToHistory('Test')
+		})
+		const entryId = result.current.history[0].id
+		act(() => {
+			result.current.renameEntry(entryId, '  trimmed  ')
+		})
+		expect(result.current.history[0].name).toBe('trimmed')
+	})
+
+	it('sets name to null for whitespace-only names', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		act(() => {
+			result.current.saveNamedToHistory('Test')
 		})
 		const entryId = result.current.history[0].id
 		act(() => {

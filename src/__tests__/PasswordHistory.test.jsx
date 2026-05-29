@@ -552,6 +552,40 @@ describe('PasswordHistory', () => {
 		expect(clearHistory).not.toHaveBeenCalled()
 	})
 
+	it('closes delete dialog on Escape key', () => {
+		const deleteEntry = vi.fn()
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				deleteEntry={deleteEntry}
+			/>
+		)
+		const deleteButtons = screen.getAllByLabelText('Delete entry')
+		fireEvent.click(deleteButtons[2])
+		const dialog = document.querySelector('dialog')
+		fireEvent.keyDown(dialog, { key: 'Escape' })
+		expect(deleteEntry).not.toHaveBeenCalled()
+	})
+
+	it('closes clear dialog on Escape key', () => {
+		const clearHistory = vi.fn()
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				clearHistory={clearHistory}
+			/>
+		)
+		fireEvent.click(screen.getByRole('button', { name: 'Clear history' }))
+		const dialogs = document.querySelectorAll('dialog')
+		const clearDialog = dialogs[1]
+		fireEvent.keyDown(clearDialog, { key: 'Escape' })
+		expect(clearHistory).not.toHaveBeenCalled()
+	})
+
 	it('scrolls to and highlights lastSavedId', () => {
 		const { rerender } = render(
 			<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />
