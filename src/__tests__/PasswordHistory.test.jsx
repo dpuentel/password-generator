@@ -118,10 +118,12 @@ describe('PasswordHistory', () => {
 		expect(navigator.clipboard.writeText).toHaveBeenCalledWith('abc123')
 	})
 
-	it('resets copied state after timeout', () => {
+	it('resets copied state after timeout', async () => {
 		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
 		const copyButtons = screen.getAllByLabelText('Copy password')
-		fireEvent.click(copyButtons[0])
+		await act(async () => {
+			fireEvent.click(copyButtons[0])
+		})
 		expect(navigator.clipboard.writeText).toHaveBeenCalledWith('abc123')
 		act(() => {
 			vi.advanceTimersByTime(1000)
@@ -403,10 +405,12 @@ describe('PasswordHistory', () => {
 		expect(screen.getAllByRole('listitem').length).toBe(3)
 	})
 
-	it('resets copied state after timeout', () => {
+	it('resets copied state after timeout', async () => {
 		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
 		const copyButtons = screen.getAllByLabelText('Copy password')
-		fireEvent.click(copyButtons[0])
+		await act(async () => {
+			fireEvent.click(copyButtons[0])
+		})
 		act(() => {
 			vi.advanceTimersByTime(1000)
 		})
@@ -461,10 +465,12 @@ describe('PasswordHistory', () => {
 		expect(clearLastSavedId).toHaveBeenCalled()
 	})
 
-	it('resets copied state after timeout', () => {
+	it('resets copied state after timeout', async () => {
 		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
 		const copyButtons = screen.getAllByLabelText('Copy password')
-		fireEvent.click(copyButtons[0])
+		await act(async () => {
+			fireEvent.click(copyButtons[0])
+		})
 		act(() => {
 			vi.advanceTimersByTime(1000)
 		})
