@@ -742,4 +742,40 @@ describe('useGeneratePassword', () => {
 		expect(result.current.history[0].name).toBe('Saved')
 		expect(result.current.history[0].password).toBe(result.current.password)
 	})
+
+	it('clearLastSavedId resets lastSavedId to null', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.saveNamedToHistory('Test')
+		})
+		expect(result.current.lastSavedId).toBeTruthy()
+		act(() => {
+			result.current.clearLastSavedId()
+		})
+		expect(result.current.lastSavedId).toBeNull()
+	})
+
+	it('renames entry with trimmed and sliced name', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		const entryId = result.current.history[0].id
+		act(() => {
+			result.current.renameEntry(entryId, '  A very long name that exceeds limit  ')
+		})
+		expect(result.current.history[0].name).toBe('A very long name that exceeds ')
+	})
+
+	it('renames entry with empty name to null', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		const entryId = result.current.history[0].id
+		act(() => {
+			result.current.renameEntry(entryId, '   ')
+		})
+		expect(result.current.history[0].name).toBeNull()
+	})
 })

@@ -66,6 +66,14 @@ describe('sessionStorage', () => {
 			expect(() => saveHistory([])).not.toThrow()
 			localStorage.setItem = original
 		})
+
+		it('handles encode error gracefully', () => {
+			const originalBtoa = global.btoa
+			global.btoa = vi.fn(() => { throw new Error('btoa error') })
+			const entries = [{ id: '1', password: 'abc', mode: 'characters', timestamp: Date.now() }]
+			expect(() => saveHistory(entries)).not.toThrow()
+			global.btoa = originalBtoa
+		})
 	})
 
 	describe('addEntry', () => {

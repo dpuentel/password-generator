@@ -193,4 +193,61 @@ describe('PasswordResult', () => {
 		render(<PasswordResult password='' placeholder='P4$5W0rD!' />)
 		expect(screen.getByLabelText('Save password')).toBeDisabled()
 	})
+
+	it('saves on Enter key', () => {
+		const onSave = vi.fn()
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' onSave={onSave} />)
+		fireEvent.click(screen.getByLabelText('Save password'))
+		const input = screen.getByLabelText('Password name')
+		fireEvent.change(input, { target: { value: 'Enter Name' } })
+		fireEvent.keyDown(input, { key: 'Enter' })
+		expect(onSave).toHaveBeenCalledWith('Enter Name')
+	})
+
+	it('closes dialog on Escape key', () => {
+		const onSave = vi.fn()
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' onSave={onSave} />)
+		fireEvent.click(screen.getByLabelText('Save password'))
+		const input = screen.getByLabelText('Password name')
+		fireEvent.keyDown(input, { key: 'Escape' })
+		expect(onSave).not.toHaveBeenCalled()
+	})
+
+	it('closes dialog on backdrop click', () => {
+		const onSave = vi.fn()
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' onSave={onSave} />)
+		fireEvent.click(screen.getByLabelText('Save password'))
+		const dialog = document.querySelector('dialog')
+		fireEvent.click(dialog)
+		expect(onSave).not.toHaveBeenCalled()
+	})
+
+	it('calls onCopy when provided', async () => {
+		const onCopy = vi.fn()
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' onCopy={onCopy} />)
+		fireEvent.click(screen.getByLabelText('Copy password to clipboard'))
+		await act(async () => {
+			await Promise.resolve()
+		})
+		expect(onCopy).toHaveBeenCalled()
+	})
+
+	it('handles missing onCopy gracefully', async () => {
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' />)
+		fireEvent.click(screen.getByLabelText('Copy password to clipboard'))
+		await act(async () => {
+			await Promise.resolve()
+		})
+	})
+
+	it('calls dialog.close when saving', () => {
+		const onSave = vi.fn()
+		render(<PasswordResult password='test' placeholder='P4$5W0rD!' onSave={onSave} />)
+		fireEvent.click(screen.getByLabelText('Save password'))
+		const dialog = document.querySelector('dialog')
+		const closeSpy = vi.spyOn(dialog, 'close')
+		const saveBtn = dialog.querySelector('.bg-green-600')
+		fireEvent.click(saveBtn)
+		expect(closeSpy).toHaveBeenCalled()
+	})
 })

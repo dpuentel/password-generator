@@ -36,6 +36,11 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 		}
 	}, [deleteConfirmId])
 
+	const applyHighlight = (id) => {
+		setHighlightedId(id)
+		setTimeout(() => setHighlightedId(null), 1800)
+	}
+
 	const scrollToAndHighlight = useCallback((id) => {
 		const entryEl = entryRefs.current[id]
 		const listEl = listRef.current
@@ -48,13 +53,9 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 
 		if (!isVisible) {
 			entryEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-			setTimeout(() => {
-				setHighlightedId(id)
-				setTimeout(() => setHighlightedId(null), 1800)
-			}, 300)
+			setTimeout(() => applyHighlight(id), 300)
 		} else {
-			setHighlightedId(id)
-			setTimeout(() => setHighlightedId(null), 1800)
+			applyHighlight(id)
 		}
 	}, [])
 
@@ -82,13 +83,13 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 		})
 	}
 
+	const resetCopied = () => setCopiedId(null)
+
 	const handleCopy = async (id, password) => {
 		try {
 			await navigator.clipboard.writeText(password)
 			setCopiedId(id)
-			setTimeout(() => {
-				setCopiedId(null)
-			}, 1000)
+			setTimeout(resetCopied, 1000)
 		} catch {
 			// silently fail
 		}

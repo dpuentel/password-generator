@@ -116,6 +116,12 @@ const createHistoryEntry = (password, mode) => ({
 	timestamp: Date.now()
 })
 
+const renameExistingEntry = (existingIndex, name) => (entry, i) =>
+	i === existingIndex ? { ...entry, name } : entry
+
+const renameEntryById = (id, name) => (e) =>
+	e.id === id ? { ...e, name } : e
+
 const reducer = (state, action) => {
 	switch (action.type) {
 	case 'SET_MODE':
@@ -156,9 +162,7 @@ const reducer = (state, action) => {
 	case 'SAVE_NAMED_TO_HISTORY': {
 		const existingIndex = state.history.findIndex((entry) => entry.password === state.password)
 		if (existingIndex !== -1) {
-			const updatedHistory = state.history.map((entry, i) =>
-				i === existingIndex ? { ...entry, name: action.name } : entry
-			)
+			const updatedHistory = state.history.map(renameExistingEntry(existingIndex, action.name))
 			saveHistory(updatedHistory)
 			return { ...state, history: updatedHistory, lastSavedId: state.history[existingIndex].id }
 		}
@@ -184,9 +188,7 @@ const reducer = (state, action) => {
 	}
 	case 'RENAME_HISTORY_ENTRY': {
 		const name = action.name?.trim().slice(0, 30) || null
-		const updatedHistory = state.history.map((e) =>
-			e.id === action.id ? { ...e, name } : e
-		)
+		const updatedHistory = state.history.map(renameEntryById(action.id, name))
 		saveHistory(updatedHistory)
 		return { ...state, history: updatedHistory }
 	}

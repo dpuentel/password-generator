@@ -392,4 +392,88 @@ describe('PasswordHistory', () => {
 		fireEvent.change(searchInput, { target: { value: '' } })
 		expect(screen.getAllByRole('listitem').length).toBe(3)
 	})
+
+	it('clears search when clicking X button', () => {
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
+		const searchInput = screen.getByLabelText('Search history')
+		fireEvent.change(searchInput, { target: { value: 'Bank' } })
+		expect(screen.getAllByRole('listitem').length).toBe(1)
+		fireEvent.click(screen.getByLabelText('Clear search'))
+		expect(searchInput.value).toBe('')
+		expect(screen.getAllByRole('listitem').length).toBe(3)
+	})
+
+	it('resets copied state after timeout', () => {
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
+		const copyButtons = screen.getAllByLabelText('Copy password')
+		fireEvent.click(copyButtons[0])
+		act(() => {
+			vi.advanceTimersByTime(1000)
+		})
+	})
+
+	it('reveals password below entry on click', () => {
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
+		const revealButtons = screen.getAllByLabelText('Reveal password')
+		fireEvent.click(revealButtons[revealButtons.length - 1])
+		expect(screen.getByText('xyz789')).toBeInTheDocument()
+	})
+
+	it('handles backdrop click on delete dialog', () => {
+		const deleteEntry = vi.fn()
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} deleteEntry={deleteEntry} />)
+		const deleteButtons = screen.getAllByLabelText('Delete entry')
+		fireEvent.click(deleteButtons[2])
+		const dialog = document.querySelector('dialog')
+		fireEvent.click(dialog)
+		expect(deleteEntry).not.toHaveBeenCalled()
+	})
+
+	it('handles backdrop click on clear dialog', () => {
+		const clearHistory = vi.fn()
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} clearHistory={clearHistory} />)
+		fireEvent.click(screen.getByRole('button', { name: 'Clear history' }))
+		const dialogs = document.querySelectorAll('dialog')
+		const clearDialog = dialogs[1]
+		fireEvent.click(clearDialog)
+		expect(clearHistory).not.toHaveBeenCalled()
+	})
+
+	it('scrolls to and highlights lastSavedId', () => {
+		const { rerender } = render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
+		rerender(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} lastSavedId='1' clearLastSavedId={vi.fn()} />)
+	})
+
+	it('uncollapses history when lastSavedId is set and collapsed', () => {
+		const setHistoryCollapsed = vi.fn()
+		const clearLastSavedId = vi.fn()
+		render(<PasswordHistory {...defaultProps} historyCollapsed={true} setHistoryCollapsed={setHistoryCollapsed} history={sampleHistory} lastSavedId='1' clearLastSavedId={clearLastSavedId} />)
+		expect(setHistoryCollapsed).toHaveBeenCalledWith(false)
+	})
+
+	it('scrolls and highlights when lastSavedId is set and not collapsed', () => {
+		const clearLastSavedId = vi.fn()
+		const { rerender } = render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
+		rerender(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} lastSavedId='1' clearLastSavedId={clearLastSavedId} />)
+		act(() => {
+			vi.advanceTimersByTime(350)
+		})
+		expect(clearLastSavedId).toHaveBeenCalled()
+	})
+
+	it('resets copied state after timeout', () => {
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
+		const copyButtons = screen.getAllByLabelText('Copy password')
+		fireEvent.click(copyButtons[0])
+		act(() => {
+			vi.advanceTimersByTime(1000)
+		})
+	})
+
+	it('reveals password below entry on click', () => {
+		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
+		const revealButtons = screen.getAllByLabelText('Reveal password')
+		fireEvent.click(revealButtons[revealButtons.length - 1])
+		expect(screen.getByText('xyz789')).toBeInTheDocument()
+	})
 })
