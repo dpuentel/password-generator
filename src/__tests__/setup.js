@@ -2,12 +2,18 @@ import '@testing-library/jest-dom'
 import { beforeEach, afterEach } from 'vitest'
 import { cleanup } from '@testing-library/react'
 
+const originalStderrWrite = process.stderr.write.bind(process.stderr)
 beforeEach(() => {
 	localStorage.clear()
+	process.stderr.write = (chunk, ...args) => {
+		if (typeof chunk === 'string' && chunk.includes('requestSubmit')) return true
+		return originalStderrWrite(chunk, ...args)
+	}
 })
 
 afterEach(() => {
 	cleanup()
+	process.stderr.write = originalStderrWrite
 })
 
 Object.defineProperty(global, 'crypto', {
@@ -37,4 +43,7 @@ HTMLDialogElement.prototype.showModal = vi.fn(function () {
 })
 HTMLDialogElement.prototype.close = vi.fn(function () {
 	this.open = false
+})
+HTMLFormElement.prototype.requestSubmit = vi.fn(function () {
+	this.submit()
 })
