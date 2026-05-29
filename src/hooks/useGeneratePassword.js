@@ -154,8 +154,13 @@ const reducer = (state, action) => {
 		return { ...state, history: updatedHistory }
 	}
 	case 'SAVE_NAMED_TO_HISTORY': {
-		if (state.history.some((entry) => entry.password === state.password)) {
-			return state
+		const existingIndex = state.history.findIndex((entry) => entry.password === state.password)
+		if (existingIndex !== -1) {
+			const updatedHistory = state.history.map((entry, i) =>
+				i === existingIndex ? { ...entry, name: action.name } : entry
+			)
+			saveHistory(updatedHistory)
+			return { ...state, history: updatedHistory }
 		}
 		const namedEntry = { ...createHistoryEntry(state.password, state.mode), name: action.name }
 		const namedUpdatedHistory = addEntry(state.history, namedEntry)

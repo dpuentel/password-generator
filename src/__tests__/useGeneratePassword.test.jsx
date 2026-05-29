@@ -716,6 +716,30 @@ describe('useGeneratePassword', () => {
 		expect(namedEntries.length).toBe(1)
 		expect(namedEntries[0].name).toBe('Preserved')
 		const unnamedEntries = result.current.history.filter((e) => !e.name)
-		expect(unnamedEntries.length).toBeLessThanOrEqual(5)
+		expect(unnamedEntries.length).toBeLessThanOrEqual(4)
+	})
+
+	it('renames existing entry when saving as named', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.generatePassword()
+		})
+		expect(result.current.history.length).toBe(1)
+		expect(result.current.history[0].name).toBeFalsy()
+		act(() => {
+			result.current.saveNamedToHistory('My Bank')
+		})
+		expect(result.current.history.length).toBe(1)
+		expect(result.current.history[0].name).toBe('My Bank')
+	})
+
+	it('creates new named entry when password not in history', () => {
+		const { result } = renderHook(() => useGeneratePassword())
+		act(() => {
+			result.current.saveNamedToHistory('Saved')
+		})
+		expect(result.current.history.length).toBe(1)
+		expect(result.current.history[0].name).toBe('Saved')
+		expect(result.current.history[0].password).toBe(result.current.password)
 	})
 })
