@@ -83,8 +83,15 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 	const confirmDelete = () => {
 		if (deleteConfirmId) {
 			deleteEntry(deleteConfirmId)
-			setDeleteConfirmId(null)
 		}
+		closeDeleteDialog()
+	}
+
+	const closeDeleteDialog = () => {
+		if (deleteDialogRef.current) {
+			deleteDialogRef.current.close()
+		}
+		setDeleteConfirmId(null)
 	}
 
 	const handleClear = () => {
@@ -93,6 +100,19 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 			setShowClearDialog(true)
 		} else {
 			clearHistory()
+		}
+	}
+
+	const closeClearDialog = () => {
+		if (clearDialogRef.current) {
+			clearDialogRef.current.close()
+		}
+		setShowClearDialog(false)
+	}
+
+	const handleDialogBackdropClick = (e, closeFn) => {
+		if (e.target === e.currentTarget) {
+			closeFn()
 		}
 	}
 
@@ -149,7 +169,7 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 												/>
 											) : (
 												<button
-													onClick={() => entry.name ? toggleReveal(entry.id) : toggleReveal(entry.id)}
+													onClick={() => toggleReveal(entry.id)}
 													className='text-gray-300 font-mono text-sm truncate min-w-0 grow text-left hover:text-gray-100 transition-colors duration-150'
 													aria-label={revealedIds.has(entry.id) ? 'Hide password' : 'Reveal password'}
 												>
@@ -223,8 +243,9 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 
 			<dialog
 				ref={deleteDialogRef}
-				onClose={() => setDeleteConfirmId(null)}
-				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50'
+				onClose={closeDeleteDialog}
+				onClick={(e) => handleDialogBackdropClick(e, closeDeleteDialog)}
+				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0'
 			>
 				<form method='dialog' className='grid gap-4'>
 					<p className='text-sm'>
@@ -234,7 +255,7 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 					<div className='flex gap-2 justify-end'>
 						<button
 							type='button'
-							onClick={() => setDeleteConfirmId(null)}
+							onClick={closeDeleteDialog}
 							className='px-4 py-2 text-xs bg-slate-700 hover:bg-slate-600 rounded'
 						>
 							Cancel
@@ -252,8 +273,9 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 
 			<dialog
 				ref={clearDialogRef}
-				onClose={() => setShowClearDialog(false)}
-				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50'
+				onClose={closeClearDialog}
+				onClick={(e) => handleDialogBackdropClick(e, closeClearDialog)}
+				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0'
 			>
 				<form method='dialog' className='grid gap-4'>
 					<p className='text-sm font-bold'>Clear History</p>
@@ -264,26 +286,26 @@ export default function PasswordHistory({ history, historyCollapsed, setHistoryC
 					<div className='flex gap-2 justify-end flex-wrap'>
 						<button
 							type='button'
-							onClick={() => setShowClearDialog(false)}
+							onClick={closeClearDialog}
 							className='px-4 py-2 text-xs bg-slate-700 hover:bg-slate-600 rounded'
 						>
 							Cancel
 						</button>
 						<button
-							type='submit'
+							type='button'
 							onClick={() => {
 								clearUnnamedHistory()
-								setShowClearDialog(false)
+								closeClearDialog()
 							}}
 							className='px-4 py-2 text-xs bg-slate-600 hover:bg-slate-500 rounded'
 						>
 							Keep Named
 						</button>
 						<button
-							type='submit'
+							type='button'
 							onClick={() => {
 								clearHistory()
-								setShowClearDialog(false)
+								closeClearDialog()
 							}}
 							className='px-4 py-2 text-xs bg-red-600 hover:bg-red-500 text-white rounded'
 						>
