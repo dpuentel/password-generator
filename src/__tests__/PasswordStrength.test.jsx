@@ -1,7 +1,10 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import PasswordStrength from '../components/PasswordStrength'
-import { PasswordEntropyCalculator, PassphraseEntropyCalculator } from '../services/PasswordEntropyCalculator'
+import {
+	PasswordEntropyCalculator,
+	PassphraseEntropyCalculator
+} from '../services/PasswordEntropyCalculator'
 
 describe('PasswordStrength', () => {
 	it('renders 10 strength bars', () => {

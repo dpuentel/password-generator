@@ -30,8 +30,20 @@ describe('usePasswordHistory', () => {
 
 	const sampleHistory = [
 		{ id: '1', password: 'abc123', mode: 'characters', timestamp: now, name: null },
-		{ id: '2', password: 'word-word-word', mode: 'passphrase', timestamp: now - 5 * 60 * 1000, name: null },
-		{ id: '3', password: 'xyz789', mode: 'characters', timestamp: now - 2 * 60 * 60 * 1000, name: 'My Bank' }
+		{
+			id: '2',
+			password: 'word-word-word',
+			mode: 'passphrase',
+			timestamp: now - 5 * 60 * 1000,
+			name: null
+		},
+		{
+			id: '3',
+			password: 'xyz789',
+			mode: 'characters',
+			timestamp: now - 2 * 60 * 60 * 1000,
+			name: 'My Bank'
+		}
 	]
 
 	const renderHistoryHook = (overrides = {}) => {
@@ -125,7 +137,11 @@ describe('usePasswordHistory', () => {
 	describe('saveEdit', () => {
 		it('calls renameEntry with id and value', () => {
 			const renameEntry = vi.fn()
-			const { result } = renderHistoryHook({ history: sampleHistory, historyCollapsed: false, renameEntry })
+			const { result } = renderHistoryHook({
+				history: sampleHistory,
+				historyCollapsed: false,
+				renameEntry
+			})
 			act(() => result.current.startEditing('1', ''))
 			act(() => {
 				result.current.setEditValue('New Name')
@@ -157,7 +173,11 @@ describe('usePasswordHistory', () => {
 	describe('handleDelete', () => {
 		it('calls deleteEntry directly for unnamed entries', () => {
 			const deleteEntry = vi.fn()
-			const { result } = renderHistoryHook({ history: sampleHistory, historyCollapsed: false, deleteEntry })
+			const { result } = renderHistoryHook({
+				history: sampleHistory,
+				historyCollapsed: false,
+				deleteEntry
+			})
 			act(() => result.current.handleDelete('1', null))
 			expect(deleteEntry).toHaveBeenCalledWith('1')
 			expect(result.current.deleteConfirmId).toBeNull()
@@ -165,7 +185,11 @@ describe('usePasswordHistory', () => {
 
 		it('sets deleteConfirmId for named entries', () => {
 			const deleteEntry = vi.fn()
-			const { result } = renderHistoryHook({ history: sampleHistory, historyCollapsed: false, deleteEntry })
+			const { result } = renderHistoryHook({
+				history: sampleHistory,
+				historyCollapsed: false,
+				deleteEntry
+			})
 			act(() => result.current.handleDelete('3', 'My Bank'))
 			expect(deleteEntry).not.toHaveBeenCalled()
 			expect(result.current.deleteConfirmId).toBe('3')
@@ -175,7 +199,11 @@ describe('usePasswordHistory', () => {
 	describe('confirmDelete', () => {
 		it('calls deleteEntry with deleteConfirmId', () => {
 			const deleteEntry = vi.fn()
-			const { result } = renderHistoryHook({ history: sampleHistory, historyCollapsed: false, deleteEntry })
+			const { result } = renderHistoryHook({
+				history: sampleHistory,
+				historyCollapsed: false,
+				deleteEntry
+			})
 			act(() => result.current.handleDelete('3', 'My Bank'))
 			act(() => result.current.confirmDelete())
 			expect(deleteEntry).toHaveBeenCalledWith('3')
@@ -195,7 +223,11 @@ describe('usePasswordHistory', () => {
 			const unnamedHistory = [
 				{ id: '1', password: 'abc', mode: 'characters', timestamp: now, name: null }
 			]
-			const { result } = renderHistoryHook({ history: unnamedHistory, historyCollapsed: false, clearHistory })
+			const { result } = renderHistoryHook({
+				history: unnamedHistory,
+				historyCollapsed: false,
+				clearHistory
+			})
 			act(() => result.current.handleClear())
 			expect(clearHistory).toHaveBeenCalled()
 			expect(result.current.showClearDialog).toBe(false)
@@ -203,7 +235,11 @@ describe('usePasswordHistory', () => {
 
 		it('sets showClearDialog when named entries exist', () => {
 			const clearHistory = vi.fn()
-			const { result } = renderHistoryHook({ history: sampleHistory, historyCollapsed: false, clearHistory })
+			const { result } = renderHistoryHook({
+				history: sampleHistory,
+				historyCollapsed: false,
+				clearHistory
+			})
 			act(() => result.current.handleClear())
 			expect(clearHistory).not.toHaveBeenCalled()
 			expect(result.current.showClearDialog).toBe(true)
@@ -281,13 +317,24 @@ describe('usePasswordHistory', () => {
 	describe('lastSavedId effect', () => {
 		it('uncollapses history when lastSavedId is set and collapsed', () => {
 			const setHistoryCollapsed = vi.fn()
-			renderHistoryHook({ history: sampleHistory, historyCollapsed: true, setHistoryCollapsed, lastSavedId: '1', clearLastSavedId: vi.fn() })
+			renderHistoryHook({
+				history: sampleHistory,
+				historyCollapsed: true,
+				setHistoryCollapsed,
+				lastSavedId: '1',
+				clearLastSavedId: vi.fn()
+			})
 			expect(setHistoryCollapsed).toHaveBeenCalledWith(false)
 		})
 
 		it('clears lastSavedId after timeout', () => {
 			const clearLastSavedId = vi.fn()
-			renderHistoryHook({ history: sampleHistory, historyCollapsed: false, lastSavedId: '1', clearLastSavedId })
+			renderHistoryHook({
+				history: sampleHistory,
+				historyCollapsed: false,
+				lastSavedId: '1',
+				clearLastSavedId
+			})
 			act(() => {
 				vi.advanceTimersByTime(350)
 			})

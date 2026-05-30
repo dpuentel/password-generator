@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { getDictionary, getBrowserLanguage, LANGUAGES, DICTIONARY_SIZE } from '../services/dictionaries'
+import {
+	getDictionary,
+	getBrowserLanguage,
+	LANGUAGES,
+	DICTIONARY_SIZE
+} from '../services/dictionaries'
 
 describe('dictionaries', () => {
 	it('exports DICTIONARY_SIZE as 2048', () => {

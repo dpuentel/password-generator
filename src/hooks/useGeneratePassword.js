@@ -10,9 +10,19 @@ import {
 	CharsetLowercaseNoAmbiguous
 } from '../services/Patterns'
 import { getDictionary, getBrowserLanguage, DICTIONARY_SIZE } from '../services/dictionaries'
-import { PasswordEntropyCalculator, PassphraseEntropyCalculator } from '../services/PasswordEntropyCalculator'
+import {
+	PasswordEntropyCalculator,
+	PassphraseEntropyCalculator
+} from '../services/PasswordEntropyCalculator'
 import { loadSettings, saveSettings } from '../services/localStorage'
-import { loadHistory, saveHistory, addEntry, clearHistory as clearHistoryStorage, loadCollapsed, saveCollapsed } from '../services/sessionStorage'
+import {
+	loadHistory,
+	saveHistory,
+	addEntry,
+	clearHistory as clearHistoryStorage,
+	loadCollapsed,
+	saveCollapsed
+} from '../services/sessionStorage'
 
 const MIN_LENGTH = 4
 const MAX_LENGTH = 64
@@ -119,8 +129,7 @@ const createHistoryEntry = (password, mode) => ({
 const renameExistingEntry = (existingIndex, name) => (entry, i) =>
 	i === existingIndex ? { ...entry, name } : entry
 
-const renameEntryById = (id, name) => (e) =>
-	e.id === id ? { ...e, name } : e
+const renameEntryById = (id, name) => (e) => (e.id === id ? { ...e, name } : e)
 
 const reducer = (state, action) => {
 	switch (action.type) {
@@ -227,20 +236,48 @@ export function useGeneratePassword() {
 	}, [])
 
 	useEffect(() => {
-		const { mode, length, includeUppercase, includeLowercase, includeNumbers,
-			includeSymbols, excludeAmbiguous, wordCount, separator, language } = state
+		const {
+			mode,
+			length,
+			includeUppercase,
+			includeLowercase,
+			includeNumbers,
+			includeSymbols,
+			excludeAmbiguous,
+			wordCount,
+			separator,
+			language
+		} = state
 		saveSettings({
-			mode, length, includeUppercase, includeLowercase, includeNumbers,
-			includeSymbols, excludeAmbiguous, wordCount, separator, language
+			mode,
+			length,
+			includeUppercase,
+			includeLowercase,
+			includeNumbers,
+			includeSymbols,
+			excludeAmbiguous,
+			wordCount,
+			separator,
+			language
 		})
 	}, [state])
 
 	useEffect(() => {
-		const result = state.mode === 'passphrase'
-			? generatePassphrase(state)
-			: generateCharacterPassword(state)
+		const result =
+			state.mode === 'passphrase' ? generatePassphrase(state) : generateCharacterPassword(state)
 		dispatch({ type: 'SET_PASSWORD', ...result })
-	}, [state.mode, state.length, state.includeUppercase, state.includeLowercase, state.includeNumbers, state.includeSymbols, state.excludeAmbiguous, state.wordCount, state.separator, state.language])
+	}, [
+		state.mode,
+		state.length,
+		state.includeUppercase,
+		state.includeLowercase,
+		state.includeNumbers,
+		state.includeSymbols,
+		state.excludeAmbiguous,
+		state.wordCount,
+		state.separator,
+		state.language
+	])
 
 	const maxEntropy = state.mode === 'passphrase' ? PASSPHRASE_MAX_ENTROPY : CHARACTERS_MAX_ENTROPY
 
@@ -272,9 +309,8 @@ export function useGeneratePassword() {
 		setSeparator: (value) => dispatch({ type: 'SET_SEPARATOR', value }),
 		setLanguage: (value) => dispatch({ type: 'SET_LANGUAGE', value }),
 		generatePassword: () => {
-			const result = state.mode === 'passphrase'
-				? generatePassphrase(state)
-				: generateCharacterPassword(state)
+			const result =
+				state.mode === 'passphrase' ? generatePassphrase(state) : generateCharacterPassword(state)
 			dispatch({ type: 'SET_PASSWORD', ...result })
 			dispatch({ type: 'ADD_TO_HISTORY' })
 		},

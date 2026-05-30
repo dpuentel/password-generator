@@ -27,8 +27,20 @@ describe('PasswordHistory', () => {
 	const now = new Date('2025-01-15T12:00:00Z').getTime()
 	const sampleHistory = [
 		{ id: '1', password: 'abc123', mode: 'characters', timestamp: now, name: null },
-		{ id: '2', password: 'word-word-word', mode: 'passphrase', timestamp: now - 5 * 60 * 1000, name: null },
-		{ id: '3', password: 'xyz789', mode: 'characters', timestamp: now - 2 * 60 * 60 * 1000, name: 'My Bank' }
+		{
+			id: '2',
+			password: 'word-word-word',
+			mode: 'passphrase',
+			timestamp: now - 5 * 60 * 1000,
+			name: null
+		},
+		{
+			id: '3',
+			password: 'xyz789',
+			mode: 'characters',
+			timestamp: now - 2 * 60 * 60 * 1000,
+			name: 'My Bank'
+		}
 	]
 
 	it('renders HISTORY header', () => {
@@ -73,7 +85,13 @@ describe('PasswordHistory', () => {
 
 	it('toggles collapse state when clicking header', () => {
 		const setHistoryCollapsed = vi.fn()
-		render(<PasswordHistory {...defaultProps} historyCollapsed={false} setHistoryCollapsed={setHistoryCollapsed} />)
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				setHistoryCollapsed={setHistoryCollapsed}
+			/>
+		)
 		fireEvent.click(screen.getByText('HISTORY'))
 		expect(setHistoryCollapsed).toHaveBeenCalledWith(true)
 	})
@@ -147,7 +165,14 @@ describe('PasswordHistory', () => {
 		const unnamedHistory = [
 			{ id: '1', password: 'abc', mode: 'characters', timestamp: now, name: null }
 		]
-		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={unnamedHistory} clearHistory={clearHistory} />)
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={unnamedHistory}
+				clearHistory={clearHistory}
+			/>
+		)
 		fireEvent.click(screen.getByRole('button', { name: 'Clear history' }))
 		expect(clearHistory).toHaveBeenCalled()
 	})
@@ -173,7 +198,14 @@ describe('PasswordHistory', () => {
 
 	it('deletes unnamed entry directly', () => {
 		const deleteEntry = vi.fn()
-		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} deleteEntry={deleteEntry} />)
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				deleteEntry={deleteEntry}
+			/>
+		)
 		const deleteButtons = screen.getAllByLabelText('Delete entry')
 		fireEvent.click(deleteButtons[0])
 		expect(deleteEntry).toHaveBeenCalledWith('1')
@@ -194,7 +226,14 @@ describe('PasswordHistory', () => {
 
 	it('calls renameEntry when saving edit', () => {
 		const renameEntry = vi.fn()
-		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} renameEntry={renameEntry} />)
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				renameEntry={renameEntry}
+			/>
+		)
 		const editButtons = screen.getAllByLabelText('Edit name')
 		fireEvent.click(editButtons[0])
 		const input = screen.getByLabelText('Password name')
@@ -205,7 +244,14 @@ describe('PasswordHistory', () => {
 
 	it('cancels edit on Escape', () => {
 		const renameEntry = vi.fn()
-		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} renameEntry={renameEntry} />)
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				renameEntry={renameEntry}
+			/>
+		)
 		const editButtons = screen.getAllByLabelText('Edit name')
 		fireEvent.click(editButtons[0])
 		const input = screen.getByLabelText('Password name')
@@ -254,7 +300,14 @@ describe('PasswordHistory', () => {
 
 	it('confirms delete for named entry', () => {
 		const deleteEntry = vi.fn()
-		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} deleteEntry={deleteEntry} />)
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				deleteEntry={deleteEntry}
+			/>
+		)
 		const deleteButtons = screen.getAllByLabelText('Delete entry')
 		fireEvent.click(deleteButtons[2])
 		const dialog = document.querySelector('dialog')
@@ -265,7 +318,14 @@ describe('PasswordHistory', () => {
 
 	it('cancels delete for named entry', () => {
 		const deleteEntry = vi.fn()
-		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} deleteEntry={deleteEntry} />)
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				deleteEntry={deleteEntry}
+			/>
+		)
 		const deleteButtons = screen.getAllByLabelText('Delete entry')
 		fireEvent.click(deleteButtons[2])
 		const dialog = document.querySelector('dialog')
@@ -283,7 +343,14 @@ describe('PasswordHistory', () => {
 
 	it('calls clearUnnamedHistory when clicking Keep Named', () => {
 		const clearUnnamedHistory = vi.fn()
-		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} clearUnnamedHistory={clearUnnamedHistory} />)
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				clearUnnamedHistory={clearUnnamedHistory}
+			/>
+		)
 		fireEvent.click(screen.getByRole('button', { name: 'Clear history' }))
 		fireEvent.click(screen.getByText('Keep Named'))
 		expect(clearUnnamedHistory).toHaveBeenCalled()
@@ -291,7 +358,14 @@ describe('PasswordHistory', () => {
 
 	it('calls clearHistory when clicking Delete All', () => {
 		const clearHistory = vi.fn()
-		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} clearHistory={clearHistory} />)
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				clearHistory={clearHistory}
+			/>
+		)
 		fireEvent.click(screen.getByRole('button', { name: 'Clear history' }))
 		fireEvent.click(screen.getByText('Delete All'))
 		expect(clearHistory).toHaveBeenCalled()
@@ -300,7 +374,15 @@ describe('PasswordHistory', () => {
 	it('cancels clear dialog', () => {
 		const clearHistory = vi.fn()
 		const clearUnnamedHistory = vi.fn()
-		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} clearHistory={clearHistory} clearUnnamedHistory={clearUnnamedHistory} />)
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				clearHistory={clearHistory}
+				clearUnnamedHistory={clearUnnamedHistory}
+			/>
+		)
 		fireEvent.click(screen.getByRole('button', { name: 'Clear history' }))
 		const dialogs = document.querySelectorAll('dialog')
 		const clearDialog = dialogs[1]
@@ -312,7 +394,11 @@ describe('PasswordHistory', () => {
 
 	it('shows scrollbar when many entries', () => {
 		const manyEntries = Array.from({ length: 10 }, (_, i) => ({
-			id: String(i), password: `pwd${i}`, mode: 'characters', timestamp: Date.now() - i * 1000, name: null
+			id: String(i),
+			password: `pwd${i}`,
+			mode: 'characters',
+			timestamp: Date.now() - i * 1000,
+			name: null
 		}))
 		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={manyEntries} />)
 		const list = screen.getByRole('list')
@@ -322,7 +408,14 @@ describe('PasswordHistory', () => {
 
 	it('saves edit on blur', () => {
 		const renameEntry = vi.fn()
-		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} renameEntry={renameEntry} />)
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				renameEntry={renameEntry}
+			/>
+		)
 		const editButtons = screen.getAllByLabelText('Edit name')
 		fireEvent.click(editButtons[0])
 		const input = screen.getByLabelText('Password name')
@@ -427,7 +520,14 @@ describe('PasswordHistory', () => {
 
 	it('handles backdrop click on delete dialog', () => {
 		const deleteEntry = vi.fn()
-		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} deleteEntry={deleteEntry} />)
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				deleteEntry={deleteEntry}
+			/>
+		)
 		const deleteButtons = screen.getAllByLabelText('Delete entry')
 		fireEvent.click(deleteButtons[2])
 		const dialog = document.querySelector('dialog')
@@ -437,7 +537,14 @@ describe('PasswordHistory', () => {
 
 	it('handles backdrop click on clear dialog', () => {
 		const clearHistory = vi.fn()
-		render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} clearHistory={clearHistory} />)
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				clearHistory={clearHistory}
+			/>
+		)
 		fireEvent.click(screen.getByRole('button', { name: 'Clear history' }))
 		const dialogs = document.querySelectorAll('dialog')
 		const clearDialog = dialogs[1]
@@ -445,22 +552,85 @@ describe('PasswordHistory', () => {
 		expect(clearHistory).not.toHaveBeenCalled()
 	})
 
+	it('closes delete dialog on Escape key', () => {
+		const deleteEntry = vi.fn()
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				deleteEntry={deleteEntry}
+			/>
+		)
+		const deleteButtons = screen.getAllByLabelText('Delete entry')
+		fireEvent.click(deleteButtons[2])
+		const dialog = document.querySelector('dialog')
+		fireEvent.keyDown(dialog, { key: 'Escape' })
+		expect(deleteEntry).not.toHaveBeenCalled()
+	})
+
+	it('closes clear dialog on Escape key', () => {
+		const clearHistory = vi.fn()
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				clearHistory={clearHistory}
+			/>
+		)
+		fireEvent.click(screen.getByRole('button', { name: 'Clear history' }))
+		const dialogs = document.querySelectorAll('dialog')
+		const clearDialog = dialogs[1]
+		fireEvent.keyDown(clearDialog, { key: 'Escape' })
+		expect(clearHistory).not.toHaveBeenCalled()
+	})
+
 	it('scrolls to and highlights lastSavedId', () => {
-		const { rerender } = render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
-		rerender(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} lastSavedId='1' clearLastSavedId={vi.fn()} />)
+		const { rerender } = render(
+			<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />
+		)
+		rerender(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				lastSavedId='1'
+				clearLastSavedId={vi.fn()}
+			/>
+		)
 	})
 
 	it('uncollapses history when lastSavedId is set and collapsed', () => {
 		const setHistoryCollapsed = vi.fn()
 		const clearLastSavedId = vi.fn()
-		render(<PasswordHistory {...defaultProps} historyCollapsed={true} setHistoryCollapsed={setHistoryCollapsed} history={sampleHistory} lastSavedId='1' clearLastSavedId={clearLastSavedId} />)
+		render(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={true}
+				setHistoryCollapsed={setHistoryCollapsed}
+				history={sampleHistory}
+				lastSavedId='1'
+				clearLastSavedId={clearLastSavedId}
+			/>
+		)
 		expect(setHistoryCollapsed).toHaveBeenCalledWith(false)
 	})
 
 	it('scrolls and highlights when lastSavedId is set and not collapsed', () => {
 		const clearLastSavedId = vi.fn()
-		const { rerender } = render(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />)
-		rerender(<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} lastSavedId='1' clearLastSavedId={clearLastSavedId} />)
+		const { rerender } = render(
+			<PasswordHistory {...defaultProps} historyCollapsed={false} history={sampleHistory} />
+		)
+		rerender(
+			<PasswordHistory
+				{...defaultProps}
+				historyCollapsed={false}
+				history={sampleHistory}
+				lastSavedId='1'
+				clearLastSavedId={clearLastSavedId}
+			/>
+		)
 		act(() => {
 			vi.advanceTimersByTime(350)
 		})

@@ -65,7 +65,7 @@ export default function PasswordResult({ password, placeholder, onCopy, onSave }
 		closeSaveDialog()
 	}
 
-	const handleDialogBackdropClick = (e) => {
+	const handleBackdropClick = (e) => {
 		if (e.target === e.currentTarget) {
 			closeSaveDialog()
 		}
@@ -86,6 +86,7 @@ export default function PasswordResult({ password, placeholder, onCopy, onSave }
 				{password || placeholder}
 			</span>
 			<button
+				type='button'
 				onClick={handleSaveClick}
 				className='w-5 shrink-0 hover:text-gray-300 ml-auto'
 				aria-label='Save password'
@@ -94,12 +95,15 @@ export default function PasswordResult({ password, placeholder, onCopy, onSave }
 				<SaveIcon />
 			</button>
 			<button
+				type='button'
 				onClick={handleCopy}
 				className='w-5 shrink-0 hover:text-gray-300'
 				aria-label='Copy password to clipboard'
 			>
 				{hasError ? (
-					<span className='text-red-500' aria-label='Copy failed'>✕</span>
+					<span className='text-red-500' aria-label='Copy failed'>
+						✕
+					</span>
 				) : isCopied ? (
 					<CheckIcon />
 				) : (
@@ -110,7 +114,8 @@ export default function PasswordResult({ password, placeholder, onCopy, onSave }
 			<dialog
 				ref={dialogRef}
 				onClose={closeSaveDialog}
-				onClick={handleDialogBackdropClick}
+				onClick={handleBackdropClick}
+				onKeyDown={(e) => { if (e.key === 'Escape') closeSaveDialog() }}
 				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0'
 			>
 				<form method='dialog' className='grid gap-4'>

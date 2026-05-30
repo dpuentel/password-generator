@@ -33,18 +33,20 @@ export default function PasswordHistory(props) {
 		handleDialogBackdropClick
 	} = usePasswordHistory(props)
 
-	const { history, historyCollapsed, setHistoryCollapsed, clearHistory, clearUnnamedHistory } = props
+	const { history, historyCollapsed, setHistoryCollapsed, clearHistory, clearUnnamedHistory } =
+		props
 
 	return (
 		<div className='bg-slate-800 w-full text-xs'>
 			<button
+				type='button'
 				onClick={() => setHistoryCollapsed(!historyCollapsed)}
 				className='w-full flex items-center justify-between p-3 hover:bg-slate-700 transition-colors duration-200'
 				aria-expanded={!historyCollapsed}
 				aria-label='Toggle history'
 			>
 				<span className='text-gray-500 font-bold'>HISTORY</span>
-				<span className='text-gray-500 w-4 h-4'>
+				<span className='text-gray-500 size-4'>
 					<ChevronIcon direction={historyCollapsed ? 'right' : 'down'} />
 				</span>
 			</button>
@@ -57,11 +59,16 @@ export default function PasswordHistory(props) {
 						{history.length === 0 ? (
 							<p className='p-3 text-gray-500 text-center'>No history yet</p>
 						) : (
-							<ul ref={listRef} className='divide-y divide-slate-700 max-h-60 overflow-y-auto scrollbar-thin'>
+							<ul
+								ref={listRef}
+								className='divide-y divide-slate-700 max-h-60 overflow-y-auto scrollbar-thin'
+							>
 								{sortedHistory.map((entry) => (
 									<li
 										key={entry.id}
-										ref={(el) => { entryRefs.current[entry.id] = el }}
+										ref={(el) => {
+											entryRefs.current[entry.id] = el
+										}}
 										className={`flex flex-col gap-1 p-3 ${highlightedId === entry.id ? 'flash-highlight' : ''}`}
 									>
 										<div className='flex items-center gap-2'>
@@ -83,9 +90,12 @@ export default function PasswordHistory(props) {
 												/>
 											) : (
 												<button
+													type='button'
 													onClick={() => toggleReveal(entry.id)}
 													className='text-gray-300 font-mono text-sm truncate min-w-0 grow text-left hover:text-gray-100 transition-colors duration-150'
-													aria-label={revealedIds.has(entry.id) ? 'Hide password' : 'Reveal password'}
+													aria-label={
+														revealedIds.has(entry.id) ? 'Hide password' : 'Reveal password'
+													}
 												>
 													{entry.name ? (
 														<span className='font-bold text-gray-200'>{entry.name}</span>
@@ -98,6 +108,7 @@ export default function PasswordHistory(props) {
 												<RelativeTime timestamp={entry.timestamp} />
 											</span>
 											<button
+												type='button'
 												onClick={() => startEditing(entry.id, entry.name)}
 												className='w-4 shrink-0 hover:text-gray-300 text-gray-500 transition-colors duration-150'
 												aria-label='Edit name'
@@ -105,17 +116,15 @@ export default function PasswordHistory(props) {
 												<PencilIcon />
 											</button>
 											<button
+												type='button'
 												onClick={() => handleCopy(entry.id, entry.password)}
 												className='w-5 shrink-0 hover:text-gray-300 text-gray-500 transition-colors duration-150'
 												aria-label='Copy password'
 											>
-												{copiedId === entry.id ? (
-													<CheckIcon />
-												) : (
-													<CopyIcon />
-												)}
+												{copiedId === entry.id ? <CheckIcon /> : <CopyIcon />}
 											</button>
 											<button
+												type='button'
 												onClick={() => handleDelete(entry.id, entry.name)}
 												className='w-4 shrink-0 hover:text-red-400 text-gray-500 transition-colors duration-150'
 												aria-label='Delete entry'
@@ -124,6 +133,7 @@ export default function PasswordHistory(props) {
 											</button>
 										</div>
 										<button
+											type='button'
 											onClick={() => toggleReveal(entry.id)}
 											className='text-gray-500 font-mono text-xs truncate text-left hover:text-gray-400 transition-colors duration-150'
 											aria-label={revealedIds.has(entry.id) ? 'Hide password' : 'Reveal password'}
@@ -147,8 +157,9 @@ export default function PasswordHistory(props) {
 									/>
 									{searchQuery && (
 										<button
+											type='button'
 											onClick={() => setSearchQuery('')}
-											className='absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 hover:text-gray-300 transition-colors duration-150'
+											className='absolute right-2 top-1/2 -translate-y-1/2 size-4 text-gray-500 hover:text-gray-300 transition-colors duration-150'
 											aria-label='Clear search'
 										>
 											<XIcon />
@@ -160,6 +171,7 @@ export default function PasswordHistory(props) {
 						{history.length > 0 && (
 							<div className='border-t border-slate-700 p-3'>
 								<button
+									type='button'
 									onClick={handleClear}
 									className='text-red-400 hover:text-red-300 font-bold w-full text-center transition-colors duration-150'
 									aria-label='Clear history'
@@ -169,7 +181,9 @@ export default function PasswordHistory(props) {
 							</div>
 						)}
 						<div className='border-t border-slate-700 p-3 text-gray-500 text-center flex items-center justify-center gap-1'>
-							<span className='w-4 h-4'><LockIcon /></span>
+							<span className='size-4'>
+								<LockIcon />
+							</span>
 							<span>All data stays in your browser</span>
 						</div>
 					</div>
@@ -180,6 +194,7 @@ export default function PasswordHistory(props) {
 				ref={deleteDialogRef}
 				onClose={closeDeleteDialog}
 				onClick={(e) => handleDialogBackdropClick(e, closeDeleteDialog)}
+				onKeyDown={(e) => { if (e.key === 'Escape') closeDeleteDialog() }}
 				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0'
 			>
 				<form method='dialog' className='grid gap-4'>
@@ -210,13 +225,14 @@ export default function PasswordHistory(props) {
 				ref={clearDialogRef}
 				onClose={closeClearDialog}
 				onClick={(e) => handleDialogBackdropClick(e, closeClearDialog)}
+				onKeyDown={(e) => { if (e.key === 'Escape') closeClearDialog() }}
 				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0'
 			>
 				<form method='dialog' className='grid gap-4'>
 					<p className='text-sm font-bold'>Clear History</p>
 					<p className='text-xs text-gray-400'>
-						You have {namedCount} named password{namedCount > 1 ? 's' : ''}.
-						Do you want to delete them too?
+						You have {namedCount} named password{namedCount > 1 ? 's' : ''}. Do you want to delete
+						them too?
 					</p>
 					<div className='flex gap-2 justify-end flex-wrap'>
 						<button

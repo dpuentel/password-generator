@@ -29,14 +29,18 @@ describe('localStorage', () => {
 
 	it('handles saveSettings when localStorage throws', () => {
 		const original = localStorage.setItem
-		localStorage.setItem = vi.fn(() => { throw new Error('full') })
+		localStorage.setItem = vi.fn(() => {
+			throw new Error('full')
+		})
 		expect(() => saveSettings({ mode: 'characters' })).not.toThrow()
 		localStorage.setItem = original
 	})
 
 	it('handles loadSettings when localStorage throws', () => {
 		const original = localStorage.getItem
-		localStorage.getItem = vi.fn(() => { throw new Error('error') })
+		localStorage.getItem = vi.fn(() => {
+			throw new Error('error')
+		})
 		expect(loadSettings()).toBeNull()
 		localStorage.getItem = original
 	})

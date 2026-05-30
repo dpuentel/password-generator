@@ -25,7 +25,14 @@ describe('sessionStorage', () => {
 		})
 
 		it('decodes base64 encoded passwords', () => {
-			const encoded = [{ id: '1', password: btoa(encodeURIComponent('abc')), mode: 'characters', timestamp: Date.now() }]
+			const encoded = [
+				{
+					id: '1',
+					password: btoa(encodeURIComponent('abc')),
+					mode: 'characters',
+					timestamp: Date.now()
+				}
+			]
 			localStorage.setItem('password-generator-history', JSON.stringify(encoded))
 			expect(loadHistory()[0].password).toBe('abc')
 		})
@@ -37,7 +44,9 @@ describe('sessionStorage', () => {
 
 		it('returns empty array when localStorage throws', () => {
 			const original = localStorage.getItem
-			localStorage.getItem = vi.fn(() => { throw new Error('error') })
+			localStorage.getItem = vi.fn(() => {
+				throw new Error('error')
+			})
 			expect(loadHistory()).toEqual([])
 			localStorage.getItem = original
 		})
@@ -62,14 +71,18 @@ describe('sessionStorage', () => {
 
 		it('handles save when localStorage throws', () => {
 			const original = localStorage.setItem
-			localStorage.setItem = vi.fn(() => { throw new Error('full') })
+			localStorage.setItem = vi.fn(() => {
+				throw new Error('full')
+			})
 			expect(() => saveHistory([])).not.toThrow()
 			localStorage.setItem = original
 		})
 
 		it('handles encode error gracefully', () => {
 			const originalBtoa = global.btoa
-			global.btoa = vi.fn(() => { throw new Error('btoa error') })
+			global.btoa = vi.fn(() => {
+				throw new Error('btoa error')
+			})
 			const entries = [{ id: '1', password: 'abc', mode: 'characters', timestamp: Date.now() }]
 			expect(() => saveHistory(entries)).not.toThrow()
 			global.btoa = originalBtoa
@@ -92,7 +105,10 @@ describe('sessionStorage', () => {
 
 		it('limits history to 4 entries', () => {
 			const entries = Array.from({ length: 4 }, (_, i) => ({
-				id: String(i), password: `pwd${i}`, mode: 'characters', timestamp: i
+				id: String(i),
+				password: `pwd${i}`,
+				mode: 'characters',
+				timestamp: i
 			}))
 			const entry = { id: '4', password: 'new', mode: 'characters', timestamp: 4 }
 			const result = addEntry(entries, entry)
@@ -111,7 +127,9 @@ describe('sessionStorage', () => {
 
 		it('handles clear when localStorage throws', () => {
 			const original = localStorage.removeItem
-			localStorage.removeItem = vi.fn(() => { throw new Error('error') })
+			localStorage.removeItem = vi.fn(() => {
+				throw new Error('error')
+			})
 			expect(() => clearHistory()).not.toThrow()
 			localStorage.removeItem = original
 		})
@@ -134,7 +152,9 @@ describe('sessionStorage', () => {
 
 		it('returns true when localStorage throws', () => {
 			const original = localStorage.getItem
-			localStorage.getItem = vi.fn(() => { throw new Error('error') })
+			localStorage.getItem = vi.fn(() => {
+				throw new Error('error')
+			})
 			expect(loadCollapsed()).toBe(true)
 			localStorage.getItem = original
 		})
@@ -148,7 +168,9 @@ describe('sessionStorage', () => {
 
 		it('handles save when localStorage throws', () => {
 			const original = localStorage.setItem
-			localStorage.setItem = vi.fn(() => { throw new Error('full') })
+			localStorage.setItem = vi.fn(() => {
+				throw new Error('full')
+			})
 			expect(() => saveCollapsed(true)).not.toThrow()
 			localStorage.setItem = original
 		})
