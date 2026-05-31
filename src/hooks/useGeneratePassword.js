@@ -40,7 +40,7 @@ const getDefaults = () => ({
 	wordCount: 4,
 	separator: '-',
 	language: getBrowserLanguage(),
-	clipboardTimeout: 60
+	clipboardTimeout: 0
 })
 
 const clampLength = (value) => {

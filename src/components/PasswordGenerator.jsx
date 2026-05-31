@@ -56,14 +56,49 @@ export default function PasswordGenerator() {
 	const [showSettingsDialog, setShowSettingsDialog] = useState(false)
 	const [countdownRemaining, setCountdownRemaining] = useState(0)
 	const [countdownTotal, setCountdownTotal] = useState(0)
+	const [clipboardPermissionGranted, setClipboardPermissionGranted] = useState(false)
 	const countdownRef = useRef(null)
 	const settingsDialogRef = useRef(null)
+
+	const checkClipboardPermission = async () => {
+		if (!navigator.clipboard) return false
+		try {
+			const result = await navigator.permissions.query({ name: 'clipboard-write' })
+			return result.state === 'granted'
+		} catch {
+			return false
+		}
+	}
+
+	useEffect(() => {
+		checkClipboardPermission().then(setClipboardPermissionGranted)
+	}, [])
 
 	useEffect(() => {
 		if (showSettingsDialog && settingsDialogRef.current) {
 			settingsDialogRef.current.showModal()
 		}
 	}, [showSettingsDialog])
+
+	const requestClipboardPermission = async () => {
+		if (!navigator.clipboard) return false
+		try {
+			await navigator.clipboard.writeText('')
+			setClipboardPermissionGranted(true)
+			return true
+		} catch {
+			try {
+				const result = await navigator.permissions.query({ name: 'clipboard-write' })
+				if (result.state === 'granted') {
+					setClipboardPermissionGranted(true)
+					return true
+				}
+			} catch {
+				// permission not granted
+			}
+			return false
+		}
+	}
 
 	const startCountdown = () => {
 		if (clipboardTimeout <= 0) return
@@ -234,14 +269,24 @@ export default function PasswordGenerator() {
 								{clipboardTimeout === 0 ? 'Off' : `${clipboardTimeout}s`}
 							</span>
 						</div>
-						<RangeSlider
-							id='clipboard-timeout'
-							min='0'
-							max='350'
-							value={clipboardTimeout}
-							onChange={(e) => setClipboardTimeout(Number(e.target.value))}
-							ariaLabel='Clipboard timeout in seconds'
-						/>
+						{clipboardPermissionGranted ? (
+							<RangeSlider
+								id='clipboard-timeout'
+								min='0'
+								max='350'
+								value={clipboardTimeout}
+								onChange={(e) => setClipboardTimeout(Number(e.target.value))}
+								ariaLabel='Clipboard timeout in seconds'
+							/>
+						) : (
+							<button
+								type='button'
+								onClick={requestClipboardPermission}
+								className='px-3 py-2 text-xs bg-slate-700 hover:bg-slate-600 rounded text-center'
+							>
+								Allow clipboard access to enable
+							</button>
+						)}
 						<div className='flex justify-between text-xs text-gray-500'>
 							<span>Off</span>
 							<span>350s</span>
