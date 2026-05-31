@@ -54,6 +54,7 @@ export default function PasswordGenerator() {
 	} = useGeneratePassword()
 
 	const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+	const [tempClipboardTimeout, setTempClipboardTimeout] = useState(0)
 	const [countdownRemaining, setCountdownRemaining] = useState(0)
 	const [countdownTotal, setCountdownTotal] = useState(0)
 	const [clipboardPermissionGranted, setClipboardPermissionGranted] = useState(false)
@@ -77,6 +78,7 @@ export default function PasswordGenerator() {
 
 	useEffect(() => {
 		if (showSettingsDialog && settingsDialogRef.current) {
+			setTempClipboardTimeout(clipboardTimeout)
 			settingsDialogRef.current.showModal()
 		}
 	}, [showSettingsDialog])
@@ -283,7 +285,7 @@ export default function PasswordGenerator() {
 				}}
 				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 min-w-72'
 			>
-				<form method='dialog' className='grid gap-4'>
+				<form className='grid gap-4'>
 					<p className='text-sm font-bold'>Settings</p>
 					<div className='grid grid-cols-1 gap-3'>
 						<div className='flex items-center justify-between gap-4'>
@@ -291,7 +293,7 @@ export default function PasswordGenerator() {
 								Clipboard auto-clear:
 							</label>
 							<span className='text-xs text-gray-300 font-bold w-12 text-right'>
-								{clipboardTimeout === 0 ? 'Off' : `${clipboardTimeout}s`}
+								{tempClipboardTimeout === 0 ? 'Off' : `${tempClipboardTimeout}s`}
 							</span>
 						</div>
 						{clipboardPermissionGranted ? (
@@ -299,8 +301,8 @@ export default function PasswordGenerator() {
 								id='clipboard-timeout'
 								min='0'
 								max='350'
-								value={clipboardTimeout}
-								onChange={(e) => setClipboardTimeout(Number(e.target.value))}
+								value={tempClipboardTimeout}
+								onChange={(e) => setTempClipboardTimeout(Number(e.target.value))}
 								ariaLabel='Clipboard timeout in seconds'
 							/>
 						) : (
@@ -331,7 +333,14 @@ export default function PasswordGenerator() {
 							Cancel
 						</button>
 						<button
-							type='submit'
+							type='button'
+							onClick={() => {
+								setClipboardTimeout(tempClipboardTimeout)
+								if (settingsDialogRef.current) {
+									settingsDialogRef.current.close()
+								}
+								setShowSettingsDialog(false)
+							}}
 							className='px-4 py-2 text-xs bg-green-600 hover:bg-green-500 text-white rounded'
 						>
 							Save
