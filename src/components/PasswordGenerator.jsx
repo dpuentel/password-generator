@@ -221,17 +221,17 @@ export default function PasswordGenerator() {
 				onKeyDown={(e) => {
 					if (e.key === 'Escape') setShowSettingsDialog(false)
 				}}
-				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0'
+				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 min-w-72'
 			>
 				<form method='dialog' className='grid gap-4'>
 					<p className='text-sm font-bold'>Settings</p>
-					<div className='grid grid-cols-1 gap-2'>
-						<div className='flex items-center justify-between'>
-							<label htmlFor='clipboard-timeout' className='text-xs text-gray-400'>
+					<div className='grid grid-cols-1 gap-3'>
+						<div className='flex items-center justify-between gap-4'>
+							<label htmlFor='clipboard-timeout' className='text-xs text-gray-400 shrink-0'>
 								Clipboard auto-clear:
 							</label>
-							<span className='text-xs text-gray-300 font-bold'>
-								{clipboardTimeout === 0 ? 'Disabled' : `${clipboardTimeout}s`}
+							<span className='text-xs text-gray-300 font-bold w-12 text-right'>
+								{clipboardTimeout === 0 ? 'Off' : `${clipboardTimeout}s`}
 							</span>
 						</div>
 						<RangeSlider
@@ -248,12 +248,19 @@ export default function PasswordGenerator() {
 							<span>350s</span>
 						</div>
 					</div>
-					<div className='flex justify-end'>
+					<div className='flex gap-2 justify-end'>
+						<button
+							type='button'
+							onClick={() => setShowSettingsDialog(false)}
+							className='px-4 py-2 text-xs bg-slate-700 hover:bg-slate-600 rounded'
+						>
+							Cancel
+						</button>
 						<button
 							type='submit'
 							className='px-4 py-2 text-xs bg-green-600 hover:bg-green-500 text-white rounded'
 						>
-							Close
+							Save
 						</button>
 					</div>
 				</form>
