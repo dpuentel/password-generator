@@ -1,7 +1,8 @@
-export default function RangeSlider({ min, max, value, onChange, ariaLabel }) {
+export default function RangeSlider({ min, max, value, onChange, ariaLabel, id }) {
 	return (
 		<input
 			type='range'
+			id={id}
 			onChange={onChange}
 			value={value}
 			min={min}
