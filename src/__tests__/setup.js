@@ -32,6 +32,9 @@ Object.defineProperty(global, 'navigator', {
 		clipboard: {
 			writeText: vi.fn(() => Promise.resolve())
 		},
+		permissions: {
+			query: vi.fn(() => Promise.resolve({ state: 'granted' }))
+		},
 		language: 'en'
 	},
 	writable: true

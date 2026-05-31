@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { CopyIcon, CheckIcon } from '../components/Icons'
+import { CopyIcon, CheckIcon, SettingsIcon } from '../components/Icons'
 
 describe('Icons', () => {
 	describe('CopyIcon', () => {
@@ -24,6 +24,18 @@ describe('Icons', () => {
 		it('has the correct title', () => {
 			render(<CheckIcon />)
 			expect(screen.getByTitle('Checkmark Done')).toHaveTextContent('Checkmark Done')
+		})
+	})
+
+	describe('SettingsIcon', () => {
+		it('renders an SVG element', () => {
+			render(<SettingsIcon />)
+			expect(screen.getByTitle('Settings')).toBeInTheDocument()
+		})
+
+		it('has the correct title', () => {
+			render(<SettingsIcon />)
+			expect(screen.getByTitle('Settings')).toHaveTextContent('Settings')
 		})
 	})
 })

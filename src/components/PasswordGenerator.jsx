@@ -58,11 +58,28 @@ export default function PasswordGenerator() {
 	const [countdownRemaining, setCountdownRemaining] = useState(0)
 	const [countdownTotal, setCountdownTotal] = useState(0)
 	const [clipboardPermissionGranted, setClipboardPermissionGranted] = useState(false)
-	const [showClipboardWarning, setShowClipboardWarning] = useState(false)
+	const [showPermissionModal, setShowPermissionModal] = useState(false)
 	const countdownRef = useRef(null)
 	const settingsDialogRef = useRef(null)
+	const permissionDialogRef = useRef(null)
 
 	const checkClipboardPermission = async () => {
+		if (!navigator.clipboard) return false
+		try {
+			const result = await navigator.permissions.query({ name: 'clipboard-write' })
+			if (result.state !== 'granted') return false
+			try {
+				await navigator.clipboard.writeText('')
+				return true
+			} catch {
+				return false
+			}
+		} catch {
+			return false
+		}
+	}
+
+	const checkClipboardPermissionState = async () => {
 		if (!navigator.clipboard) return false
 		try {
 			const result = await navigator.permissions.query({ name: 'clipboard-write' })
@@ -83,29 +100,33 @@ export default function PasswordGenerator() {
 		}
 	}, [showSettingsDialog])
 
+	useEffect(() => {
+		if (showPermissionModal && permissionDialogRef.current) {
+			permissionDialogRef.current.showModal()
+		}
+	}, [showPermissionModal])
+
 	const handlePermissionDenied = () => {
 		setClipboardPermissionGranted(false)
 		setClipboardTimeout(0)
-		setShowClipboardWarning(true)
-		setTimeout(() => setShowClipboardWarning(false), 3000)
+		setShowPermissionModal(true)
 	}
 
 	const requestClipboardPermission = async () => {
 		if (!navigator.clipboard) return false
 		try {
-			await navigator.clipboard.writeText('')
-			setClipboardPermissionGranted(true)
-			return true
-		} catch {
-			try {
-				const result = await navigator.permissions.query({ name: 'clipboard-write' })
-				if (result.state === 'granted') {
-					setClipboardPermissionGranted(true)
-					return true
-				}
-			} catch {
-				// permission not granted
+			const result = await navigator.permissions.query({ name: 'clipboard-write' })
+			if (result.state === 'granted') {
+				setClipboardPermissionGranted(true)
+				return true
 			}
+			if (result.state === 'prompt') {
+				await navigator.clipboard.writeText(' ')
+				setClipboardPermissionGranted(true)
+				return true
+			}
+			return false
+		} catch {
 			return false
 		}
 	}
@@ -127,7 +148,7 @@ export default function PasswordGenerator() {
 		setCountdownRemaining(clipboardTimeout)
 
 		countdownRef.current = setInterval(async () => {
-			const stillHasPermission = await checkClipboardPermission()
+			const stillHasPermission = await checkClipboardPermissionState()
 			if (!stillHasPermission) {
 				clearInterval(countdownRef.current)
 				handlePermissionDenied()
@@ -137,7 +158,9 @@ export default function PasswordGenerator() {
 			setCountdownRemaining((prev) => {
 				if (prev <= 1) {
 					clearInterval(countdownRef.current)
-					navigator.clipboard.writeText('').catch(() => {})
+					navigator.clipboard.writeText('').catch(() => {
+						handlePermissionDenied()
+					})
 					setCountdownRemaining(0)
 					return 0
 				}
@@ -164,11 +187,7 @@ export default function PasswordGenerator() {
 	return (
 		<section className='grid grid-cols-1 gap-4 place-items-center'>
 			<article className='w-80'>
-				<CopyCountdown
-					remaining={countdownRemaining}
-					total={countdownTotal}
-					warning={showClipboardWarning ? 'Clipboard access lost - auto-clear disabled' : null}
-				/>
+				<CopyCountdown remaining={countdownRemaining} total={countdownTotal} />
 				<PasswordResult
 					password={password}
 					placeholder={placeholder}
@@ -334,7 +353,18 @@ export default function PasswordGenerator() {
 						</button>
 						<button
 							type='button'
-							onClick={() => {
+							onClick={async () => {
+								if (tempClipboardTimeout > 0) {
+									const hasPermission = await checkClipboardPermission()
+									if (!hasPermission) {
+										if (settingsDialogRef.current) {
+											settingsDialogRef.current.close()
+										}
+										setShowSettingsDialog(false)
+										setShowPermissionModal(true)
+										return
+									}
+								}
 								setClipboardTimeout(tempClipboardTimeout)
 								if (settingsDialogRef.current) {
 									settingsDialogRef.current.close()
@@ -344,6 +374,61 @@ export default function PasswordGenerator() {
 							className='px-4 py-2 text-xs bg-green-600 hover:bg-green-500 text-white rounded'
 						>
 							Save
+						</button>
+					</div>
+				</form>
+			</dialog>
+
+			<dialog
+				ref={permissionDialogRef}
+				onClose={() => {
+					setShowPermissionModal(false)
+				}}
+				onKeyDown={(e) => {
+					if (e.key === 'Escape') setShowPermissionModal(false)
+				}}
+				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 min-w-80'
+			>
+				<form className='grid gap-4' onSubmit={(e) => e.preventDefault()}>
+					<p className='text-sm font-bold text-red-400'>Clipboard Access Required</p>
+					<p className='text-xs text-gray-400'>
+						The auto-clear clipboard feature requires permission to access your clipboard.
+					</p>
+					<div className='text-xs text-gray-300 bg-slate-900 p-3 rounded'>
+						<p className='font-bold mb-2'>To re-enable auto-clear:</p>
+						<ol className='list-decimal list-inside space-y-1 text-gray-400'>
+							<li>Click "Allow Access" below</li>
+							<li>When your browser asks, allow clipboard access</li>
+							<li>Open settings and set your desired timeout</li>
+						</ol>
+					</div>
+					<div className='flex gap-2 justify-end'>
+						<button
+							type='button'
+							onClick={() => {
+								if (permissionDialogRef.current) {
+									permissionDialogRef.current.close()
+								}
+								setShowPermissionModal(false)
+							}}
+							className='px-4 py-2 text-xs bg-slate-700 hover:bg-slate-600 rounded'
+						>
+							Close
+						</button>
+						<button
+							type='button'
+							onClick={async () => {
+								const granted = await requestClipboardPermission()
+								if (granted) {
+									if (permissionDialogRef.current) {
+										permissionDialogRef.current.close()
+									}
+									setShowPermissionModal(false)
+								}
+							}}
+							className='px-4 py-2 text-xs bg-green-600 hover:bg-green-500 text-white rounded'
+						>
+							Allow Access
 						</button>
 					</div>
 				</form>

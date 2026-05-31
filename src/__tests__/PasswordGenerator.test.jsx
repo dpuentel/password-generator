@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import PasswordGenerator from '../components/PasswordGenerator'
 
 describe('PasswordGenerator', () => {
@@ -113,5 +113,49 @@ describe('PasswordGenerator', () => {
 		render(<PasswordGenerator />)
 		const copyButton = screen.getByLabelText('Copy password to clipboard')
 		expect(copyButton).toBeInTheDocument()
+	})
+
+	it('opens settings dialog when clicking settings button', async () => {
+		render(<PasswordGenerator />)
+		fireEvent.click(screen.getByLabelText('Open settings'))
+		await act(async () => {
+			await Promise.resolve()
+		})
+		expect(screen.getByText('Clipboard auto-clear:')).toBeInTheDocument()
+	})
+
+	it('shows clipboard auto-clear option in settings', async () => {
+		render(<PasswordGenerator />)
+		fireEvent.click(screen.getByLabelText('Open settings'))
+		await act(async () => {
+			await Promise.resolve()
+		})
+		expect(screen.getByText('Clipboard auto-clear:')).toBeInTheDocument()
+	})
+
+	it('shows permission button when clipboard permission is denied', async () => {
+		navigator.permissions.query.mockResolvedValue({ state: 'denied' })
+		navigator.clipboard.writeText.mockRejectedValue(new Error('Permission denied'))
+		render(<PasswordGenerator />)
+		fireEvent.click(screen.getByLabelText('Open settings'))
+		await act(async () => {
+			await Promise.resolve()
+		})
+		expect(screen.getByText('Allow clipboard access to enable')).toBeInTheDocument()
+	})
+
+	it('does not show countdown when clipboard timeout is 0', () => {
+		render(<PasswordGenerator />)
+		expect(screen.queryByText(/Clipboard clears in/)).not.toBeInTheDocument()
+	})
+
+	it('triggers clipboard write when copying', async () => {
+		render(<PasswordGenerator />)
+		fireEvent.click(screen.getByRole('button', { name: 'Generate password' }))
+		fireEvent.click(screen.getByLabelText('Copy password to clipboard'))
+		await act(async () => {
+			await Promise.resolve()
+		})
+		expect(navigator.clipboard.writeText).toHaveBeenCalled()
 	})
 })
