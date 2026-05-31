@@ -148,6 +148,8 @@ export const SettingsIcon = () => (
 		strokeWidth='2'
 		strokeLinecap='round'
 		strokeLinejoin='round'
+		width='20'
+		height='20'
 	>
 		<title>Settings</title>
 		<circle cx='12' cy='12' r='3' />
