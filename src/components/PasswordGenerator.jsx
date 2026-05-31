@@ -244,7 +244,6 @@ export default function PasswordGenerator() {
 						/>
 						<div className='flex justify-between text-xs text-gray-500'>
 							<span>Off</span>
-							<span>10s</span>
 							<span>350s</span>
 						</div>
 					</div>
