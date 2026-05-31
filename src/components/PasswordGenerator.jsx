@@ -7,7 +7,9 @@ import PasswordStrength from './PasswordStrength'
 import ModeSelector from './ModeSelector'
 import PassphraseOptions from './PassphraseOptions'
 import PasswordHistory from './PasswordHistory'
+import CopyCountdown from './CopyCountdown'
 import { useGeneratePassword } from '../hooks/useGeneratePassword'
+import { useState, useEffect, useRef } from 'react'
 
 export default function PasswordGenerator() {
 	const {
@@ -32,6 +34,8 @@ export default function PasswordGenerator() {
 		setSeparator,
 		language,
 		setLanguage,
+		clipboardTimeout,
+		setClipboardTimeout,
 		entropy,
 		maxEntropy,
 		history,
@@ -48,6 +52,41 @@ export default function PasswordGenerator() {
 		clearLastSavedId
 	} = useGeneratePassword()
 
+	const [countdownRemaining, setCountdownRemaining] = useState(0)
+	const [countdownTotal, setCountdownTotal] = useState(0)
+	const countdownRef = useRef(null)
+
+	const startCountdown = () => {
+		if (clipboardTimeout <= 0) return
+
+		if (countdownRef.current) {
+			clearInterval(countdownRef.current)
+		}
+
+		setCountdownTotal(clipboardTimeout)
+		setCountdownRemaining(clipboardTimeout)
+
+		countdownRef.current = setInterval(() => {
+			setCountdownRemaining((prev) => {
+				if (prev <= 1) {
+					clearInterval(countdownRef.current)
+					navigator.clipboard.writeText('').catch(() => {})
+					setCountdownRemaining(0)
+					return 0
+				}
+				return prev - 1
+			})
+		}, 1000)
+	}
+
+	useEffect(() => {
+		return () => {
+			if (countdownRef.current) {
+				clearInterval(countdownRef.current)
+			}
+		}
+	}, [])
+
 	const activeCount = [includeLowercase, includeUppercase, includeNumbers, includeSymbols].filter(
 		Boolean
 	).length
@@ -58,14 +97,34 @@ export default function PasswordGenerator() {
 	return (
 		<section className='grid grid-cols-1 gap-4 place-items-center'>
 			<article className='w-80'>
+				<CopyCountdown remaining={countdownRemaining} total={countdownTotal} />
 				<PasswordResult
 					password={password}
 					placeholder={placeholder}
 					onCopy={saveCurrentToHistory}
 					onSave={saveNamedToHistory}
+					onCopyWithCountdown={startCountdown}
 				/>
 			</article>
 			<article className='bg-slate-800 min-w-48 w-80 p-4 grid grid-cols-1 gap-4 text-xs'>
+				<div className='flex items-center justify-between'>
+					<span className='text-gray-500 font-bold'>SETTINGS</span>
+				</div>
+				<div className='flex items-center gap-2 text-xs text-gray-400'>
+					<span>Clipboard timeout:</span>
+					<select
+						value={clipboardTimeout}
+						onChange={(e) => setClipboardTimeout(Number(e.target.value))}
+						className='bg-slate-900 text-gray-300 px-2 py-1 rounded'
+						aria-label='Clipboard timeout'
+					>
+						<option value={0}>Disabled</option>
+						<option value={30}>30s</option>
+						<option value={60}>60s</option>
+						<option value={120}>2min</option>
+						<option value={300}>5min</option>
+					</select>
+				</div>
 				<ModeSelector mode={mode} setMode={setMode} />
 				<div className='relative'>
 					<div
@@ -150,6 +209,7 @@ export default function PasswordGenerator() {
 					renameEntry={renameEntry}
 					lastSavedId={lastSavedId}
 					clearLastSavedId={clearLastSavedId}
+					onCopyWithCountdown={startCountdown}
 				/>
 			</article>
 		</section>

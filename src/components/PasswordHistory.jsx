@@ -33,8 +33,14 @@ export default function PasswordHistory(props) {
 		handleDialogBackdropClick
 	} = usePasswordHistory(props)
 
-	const { history, historyCollapsed, setHistoryCollapsed, clearHistory, clearUnnamedHistory } =
-		props
+	const {
+		history,
+		historyCollapsed,
+		setHistoryCollapsed,
+		clearHistory,
+		clearUnnamedHistory,
+		onCopyWithCountdown
+	} = props
 
 	return (
 		<div className='bg-slate-800 w-full text-xs'>
@@ -117,7 +123,10 @@ export default function PasswordHistory(props) {
 											</button>
 											<button
 												type='button'
-												onClick={() => handleCopy(entry.id, entry.password)}
+												onClick={() => {
+													handleCopy(entry.id, entry.password)
+													if (onCopyWithCountdown) onCopyWithCountdown()
+												}}
 												className='w-5 shrink-0 hover:text-gray-300 text-gray-500 transition-colors duration-150'
 												aria-label='Copy password'
 											>
@@ -194,7 +203,9 @@ export default function PasswordHistory(props) {
 				ref={deleteDialogRef}
 				onClose={closeDeleteDialog}
 				onClick={(e) => handleDialogBackdropClick(e, closeDeleteDialog)}
-				onKeyDown={(e) => { if (e.key === 'Escape') closeDeleteDialog() }}
+				onKeyDown={(e) => {
+					if (e.key === 'Escape') closeDeleteDialog()
+				}}
 				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0'
 			>
 				<form method='dialog' className='grid gap-4'>
@@ -225,7 +236,9 @@ export default function PasswordHistory(props) {
 				ref={clearDialogRef}
 				onClose={closeClearDialog}
 				onClick={(e) => handleDialogBackdropClick(e, closeClearDialog)}
-				onKeyDown={(e) => { if (e.key === 'Escape') closeClearDialog() }}
+				onKeyDown={(e) => {
+					if (e.key === 'Escape') closeClearDialog()
+				}}
 				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0'
 			>
 				<form method='dialog' className='grid gap-4'>

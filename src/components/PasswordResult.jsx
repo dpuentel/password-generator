@@ -1,7 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { CheckIcon, CopyIcon, SaveIcon } from './Icons'
 
-export default function PasswordResult({ password, placeholder, onCopy, onSave }) {
+export default function PasswordResult({
+	password,
+	placeholder,
+	onCopy,
+	onSave,
+	onCopyWithCountdown
+}) {
 	const [isCopied, setIsCopied] = useState(false)
 	const [hasError, setHasError] = useState(false)
 	const [showSaveDialog, setShowSaveDialog] = useState(false)
@@ -31,6 +37,7 @@ export default function PasswordResult({ password, placeholder, onCopy, onSave }
 			setTimeout(() => {
 				setIsCopied(false)
 			}, 1000)
+			if (onCopyWithCountdown) onCopyWithCountdown()
 		} catch {
 			setHasError(true)
 			setTimeout(() => {
@@ -115,7 +122,9 @@ export default function PasswordResult({ password, placeholder, onCopy, onSave }
 				ref={dialogRef}
 				onClose={closeSaveDialog}
 				onClick={handleBackdropClick}
-				onKeyDown={(e) => { if (e.key === 'Escape') closeSaveDialog() }}
+				onKeyDown={(e) => {
+					if (e.key === 'Escape') closeSaveDialog()
+				}}
 				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0'
 			>
 				<form method='dialog' className='grid gap-4'>
