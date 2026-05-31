@@ -57,6 +57,7 @@ export default function PasswordGenerator() {
 	const [countdownRemaining, setCountdownRemaining] = useState(0)
 	const [countdownTotal, setCountdownTotal] = useState(0)
 	const [clipboardPermissionGranted, setClipboardPermissionGranted] = useState(false)
+	const [showClipboardWarning, setShowClipboardWarning] = useState(false)
 	const countdownRef = useRef(null)
 	const settingsDialogRef = useRef(null)
 
@@ -80,6 +81,13 @@ export default function PasswordGenerator() {
 		}
 	}, [showSettingsDialog])
 
+	const handlePermissionDenied = () => {
+		setClipboardPermissionGranted(false)
+		setClipboardTimeout(0)
+		setShowClipboardWarning(true)
+		setTimeout(() => setShowClipboardWarning(false), 3000)
+	}
+
 	const requestClipboardPermission = async () => {
 		if (!navigator.clipboard) return false
 		try {
@@ -100,8 +108,14 @@ export default function PasswordGenerator() {
 		}
 	}
 
-	const startCountdown = () => {
+	const startCountdown = async () => {
 		if (clipboardTimeout <= 0) return
+
+		const hasPermission = await checkClipboardPermission()
+		if (!hasPermission) {
+			handlePermissionDenied()
+			return
+		}
 
 		if (countdownRef.current) {
 			clearInterval(countdownRef.current)
@@ -110,7 +124,14 @@ export default function PasswordGenerator() {
 		setCountdownTotal(clipboardTimeout)
 		setCountdownRemaining(clipboardTimeout)
 
-		countdownRef.current = setInterval(() => {
+		countdownRef.current = setInterval(async () => {
+			const stillHasPermission = await checkClipboardPermission()
+			if (!stillHasPermission) {
+				clearInterval(countdownRef.current)
+				handlePermissionDenied()
+				return
+			}
+
 			setCountdownRemaining((prev) => {
 				if (prev <= 1) {
 					clearInterval(countdownRef.current)
@@ -141,7 +162,11 @@ export default function PasswordGenerator() {
 	return (
 		<section className='grid grid-cols-1 gap-4 place-items-center'>
 			<article className='w-80'>
-				<CopyCountdown remaining={countdownRemaining} total={countdownTotal} />
+				<CopyCountdown
+					remaining={countdownRemaining}
+					total={countdownTotal}
+					warning={showClipboardWarning ? 'Clipboard access lost - auto-clear disabled' : null}
+				/>
 				<PasswordResult
 					password={password}
 					placeholder={placeholder}
