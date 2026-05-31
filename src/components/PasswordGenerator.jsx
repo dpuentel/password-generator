@@ -320,7 +320,12 @@ export default function PasswordGenerator() {
 					<div className='flex gap-2 justify-end'>
 						<button
 							type='button'
-							onClick={() => setShowSettingsDialog(false)}
+							onClick={() => {
+								if (settingsDialogRef.current) {
+									settingsDialogRef.current.close()
+								}
+								setShowSettingsDialog(false)
+							}}
 							className='px-4 py-2 text-xs bg-slate-700 hover:bg-slate-600 rounded'
 						>
 							Cancel
