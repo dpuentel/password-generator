@@ -8,6 +8,8 @@ import ModeSelector from './ModeSelector'
 import PassphraseOptions from './PassphraseOptions'
 import PasswordHistory from './PasswordHistory'
 import CopyCountdown from './CopyCountdown'
+import SettingsDialog from './SettingsDialog'
+import PermissionDialog from './PermissionDialog'
 import { SettingsIcon } from './Icons'
 import { useGeneratePassword } from '../hooks/useGeneratePassword'
 import { useState, useEffect, useRef } from 'react'
@@ -177,6 +179,49 @@ export default function PasswordGenerator() {
 		}
 	}, [])
 
+	const handleSettingsCancel = () => {
+		if (settingsDialogRef.current) {
+			settingsDialogRef.current.close()
+		}
+		setShowSettingsDialog(false)
+	}
+
+	const handleSettingsSave = async () => {
+		if (tempClipboardTimeout > 0) {
+			const hasPermission = await checkClipboardPermission()
+			if (!hasPermission) {
+				if (settingsDialogRef.current) {
+					settingsDialogRef.current.close()
+				}
+				setShowSettingsDialog(false)
+				setShowPermissionModal(true)
+				return
+			}
+		}
+		setClipboardTimeout(tempClipboardTimeout)
+		if (settingsDialogRef.current) {
+			settingsDialogRef.current.close()
+		}
+		setShowSettingsDialog(false)
+	}
+
+	const handlePermissionClose = () => {
+		if (permissionDialogRef.current) {
+			permissionDialogRef.current.close()
+		}
+		setShowPermissionModal(false)
+	}
+
+	const handlePermissionAllow = async () => {
+		const granted = await requestClipboardPermission()
+		if (granted) {
+			if (permissionDialogRef.current) {
+				permissionDialogRef.current.close()
+			}
+			setShowPermissionModal(false)
+		}
+	}
+
 	const activeCount = [includeLowercase, includeUppercase, includeNumbers, includeSymbols].filter(
 		Boolean
 	).length
@@ -296,143 +341,21 @@ export default function PasswordGenerator() {
 				/>
 			</article>
 
-			<dialog
-				ref={settingsDialogRef}
-				onClose={() => setShowSettingsDialog(false)}
-				onKeyDown={(e) => {
-					if (e.key === 'Escape') setShowSettingsDialog(false)
-				}}
-				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 min-w-72'
-			>
-				<form className='grid gap-4'>
-					<p className='text-sm font-bold'>Settings</p>
-					<div className='grid grid-cols-1 gap-3'>
-						<div className='flex items-center justify-between gap-4'>
-							<label htmlFor='clipboard-timeout' className='text-xs text-gray-400 shrink-0'>
-								Clipboard auto-clear:
-							</label>
-							<span className='text-xs text-gray-300 font-bold w-12 text-right'>
-								{tempClipboardTimeout === 0 ? 'Off' : `${tempClipboardTimeout}s`}
-							</span>
-						</div>
-						{clipboardPermissionGranted ? (
-							<RangeSlider
-								id='clipboard-timeout'
-								min='0'
-								max='350'
-								value={tempClipboardTimeout}
-								onChange={(e) => setTempClipboardTimeout(Number(e.target.value))}
-								ariaLabel='Clipboard timeout in seconds'
-							/>
-						) : (
-							<button
-								type='button'
-								onClick={requestClipboardPermission}
-								className='px-3 py-2 text-xs bg-slate-700 hover:bg-slate-600 rounded text-center'
-							>
-								Allow clipboard access to enable
-							</button>
-						)}
-						<div className='flex justify-between text-xs text-gray-500'>
-							<span>Off</span>
-							<span>350s</span>
-						</div>
-					</div>
-					<div className='flex gap-2 justify-end'>
-						<button
-							type='button'
-							onClick={() => {
-								if (settingsDialogRef.current) {
-									settingsDialogRef.current.close()
-								}
-								setShowSettingsDialog(false)
-							}}
-							className='px-4 py-2 text-xs bg-slate-700 hover:bg-slate-600 rounded'
-						>
-							Cancel
-						</button>
-						<button
-							type='button'
-							onClick={async () => {
-								if (tempClipboardTimeout > 0) {
-									const hasPermission = await checkClipboardPermission()
-									if (!hasPermission) {
-										if (settingsDialogRef.current) {
-											settingsDialogRef.current.close()
-										}
-										setShowSettingsDialog(false)
-										setShowPermissionModal(true)
-										return
-									}
-								}
-								setClipboardTimeout(tempClipboardTimeout)
-								if (settingsDialogRef.current) {
-									settingsDialogRef.current.close()
-								}
-								setShowSettingsDialog(false)
-							}}
-							className='px-4 py-2 text-xs bg-green-600 hover:bg-green-500 text-white rounded'
-						>
-							Save
-						</button>
-					</div>
-				</form>
-			</dialog>
+			<SettingsDialog
+				settingsDialogRef={settingsDialogRef}
+				clipboardPermissionGranted={clipboardPermissionGranted}
+				tempClipboardTimeout={tempClipboardTimeout}
+				setTempClipboardTimeout={setTempClipboardTimeout}
+				onCancel={handleSettingsCancel}
+				onSave={handleSettingsSave}
+				onRequestPermission={requestClipboardPermission}
+			/>
 
-			<dialog
-				ref={permissionDialogRef}
-				onClose={() => {
-					setShowPermissionModal(false)
-				}}
-				onKeyDown={(e) => {
-					if (e.key === 'Escape') setShowPermissionModal(false)
-				}}
-				className='bg-slate-800 text-gray-300 p-6 rounded-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 min-w-80'
-			>
-				<form className='grid gap-4' onSubmit={(e) => e.preventDefault()}>
-					<p className='text-sm font-bold text-red-400'>Clipboard Access Required</p>
-					<p className='text-xs text-gray-400'>
-						The auto-clear clipboard feature requires permission to access your clipboard.
-					</p>
-					<div className='text-xs text-gray-300 bg-slate-900 p-3 rounded'>
-						<p className='font-bold mb-2'>To re-enable auto-clear:</p>
-						<ol className='list-decimal list-inside space-y-1 text-gray-400'>
-							<li>Click "Allow Access" below</li>
-							<li>When your browser asks, allow clipboard access</li>
-							<li>Open settings and set your desired timeout</li>
-						</ol>
-					</div>
-					<div className='flex gap-2 justify-end'>
-						<button
-							type='button'
-							onClick={() => {
-								if (permissionDialogRef.current) {
-									permissionDialogRef.current.close()
-								}
-								setShowPermissionModal(false)
-							}}
-							className='px-4 py-2 text-xs bg-slate-700 hover:bg-slate-600 rounded'
-						>
-							Close
-						</button>
-						<button
-							type='button'
-							onClick={async () => {
-								const granted = await requestClipboardPermission()
-								if (granted) {
-									if (permissionDialogRef.current) {
-										permissionDialogRef.current.close()
-									}
-									setShowPermissionModal(false)
-								}
-							}}
-							className='px-4 py-2 text-xs bg-green-600 hover:bg-green-500 text-white rounded'
-						>
-							Allow Access
-						</button>
-					</div>
-				</form>
-			</dialog>
+			<PermissionDialog
+				permissionDialogRef={permissionDialogRef}
+				onClose={handlePermissionClose}
+				onAllowAccess={handlePermissionAllow}
+			/>
 		</section>
 	)
 }
