@@ -1,0 +1,10 @@
+services:
+  password-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: password-generator
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:80"
+
