@@ -1,6 +1,6 @@
 # Password Generator
 
-[![Deploy](https://github.com/dpuentel/password-generator/actions/workflows/deploy-to-vps.yml/badge.svg)](https://github.com/dpuentel/password-generator/actions/workflows/deploy-to-vps.yml)
+[![CI](https://github.com/dpuentel/password-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/dpuentel/password-generator/actions/workflows/ci.yml)
 ![coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/dpuentel/password-generator/main/coverage.json)
 
 You can test a **[demo here](https://password-generator.dpuentel.com/)**.
@@ -25,9 +25,17 @@ Generates cryptographically secure passwords using `window.crypto.getRandomValue
 | [ESLint](https://eslint.org/) | 10.4.0 |
 | [Prettier](https://prettier.io/) | 3.8.3 |
 
-### 📦 [Dinahosting VPS](https://www.dinahosting.com/)
+## 🐳 Deployment (Docker & Dokploy)
 
-The [demo](https://password-generator.dpuentel.com/) is deployed to a VPS from Dinahosting using a GitHub Action.
+The [demo](https://password-generator.dpuentel.com/) is deployed using [Dokploy](https://dokploy.com/) with a multi-stage `Dockerfile` (`node:24-alpine` + `nginx:1.27-alpine`).
+
+To build and run the production container locally with Docker Compose:
+
+```bash
+docker compose up -d --build
+```
+
+The app will be available at `http://localhost:8080` (configurable via the `PORT` environment variable).
 
 ## 🛠️ Available Scripts
 

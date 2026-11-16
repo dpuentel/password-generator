@@ -1,0 +1,17 @@
+node_modules
+dist
+.output
+.astro
+coverage
+coverage.json
+.git
+.github
+.agents
+.vscode
+*.log
+.pnpm-debug.log*
+.env*
+.DS_Store
+README.md
+AGENTS.md
+

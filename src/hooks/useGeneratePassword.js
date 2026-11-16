@@ -39,7 +39,8 @@ const getDefaults = () => ({
 	excludeAmbiguous: false,
 	wordCount: 4,
 	separator: '-',
-	language: getBrowserLanguage()
+	language: getBrowserLanguage(),
+	clipboardTimeout: 0
 })
 
 const clampLength = (value) => {
@@ -157,6 +158,8 @@ const reducer = (state, action) => {
 		return { ...state, separator: action.value }
 	case 'SET_LANGUAGE':
 		return { ...state, language: action.value }
+	case 'SET_CLIPBOARD_TIMEOUT':
+		return { ...state, clipboardTimeout: action.value }
 	case 'SET_PASSWORD':
 		return { ...state, password: action.password, entropy: action.entropy }
 	case 'ADD_TO_HISTORY': {
@@ -246,7 +249,8 @@ export function useGeneratePassword() {
 			excludeAmbiguous,
 			wordCount,
 			separator,
-			language
+			language,
+			clipboardTimeout
 		} = state
 		saveSettings({
 			mode,
@@ -258,7 +262,8 @@ export function useGeneratePassword() {
 			excludeAmbiguous,
 			wordCount,
 			separator,
-			language
+			language,
+			clipboardTimeout
 		})
 	}, [state])
 
@@ -294,6 +299,7 @@ export function useGeneratePassword() {
 		wordCount: state.wordCount,
 		separator: state.separator,
 		language: state.language,
+		clipboardTimeout: state.clipboardTimeout,
 		entropy: state.entropy,
 		maxEntropy,
 		history: state.history,
@@ -308,6 +314,7 @@ export function useGeneratePassword() {
 		setWordCount: (value) => dispatch({ type: 'SET_WORD_COUNT', value }),
 		setSeparator: (value) => dispatch({ type: 'SET_SEPARATOR', value }),
 		setLanguage: (value) => dispatch({ type: 'SET_LANGUAGE', value }),
+		setClipboardTimeout: (value) => dispatch({ type: 'SET_CLIPBOARD_TIMEOUT', value }),
 		generatePassword: () => {
 			const result =
 				state.mode === 'passphrase' ? generatePassphrase(state) : generateCharacterPassword(state)
